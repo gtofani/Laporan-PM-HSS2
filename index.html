@@ -11,24 +11,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
-    --ink:#1a1a1a;
-    --ink-2:#333333;
-    --paper:#ffffff;
-    --paper-warm:#f9f9f9;
-    --paper-deep:#f2f2f2;
-    --accent:#0F766E;
-    --accent-deep:#0B5D56;
-    --accent-soft:#ccfbf1;
-    --teal:#0F766E;
-    --teal-deep:#0B5D56;
-    --rose:#A8324E;
-    --emerald:#15803D;
-    --slate:#475569;
-    --slate-light:#94A3B8;
-    --border:#e2e8f0;
-    --border-soft:#f1f5f9;
+    --ink:#1a1a1a; --ink-2:#333333; --paper:#ffffff; --paper-warm:#f9f9f9; --paper-deep:#f2f2f2;
+    --accent:#0F766E; --accent-deep:#0B5D56; --accent-soft:#ccfbf1; --teal:#0F766E; --teal-deep:#0B5D56;
+    --rose:#A8324E; --emerald:#15803D; --slate:#475569; --slate-light:#94A3B8; --border:#e2e8f0; --border-soft:#f1f5f9;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -38,9 +26,7 @@
       radial-gradient(1200px 800px at 10% -10%, rgba(15,118,110,.07), transparent 60%),
       radial-gradient(900px 700px at 110% 10%, rgba(201,169,97,.09), transparent 60%),
       linear-gradient(180deg,#0A0E27 0%, #0E1530 100%);
-    background-attachment:fixed;
-    color:var(--ink);
-    min-height:100vh;
+    background-attachment:fixed; color:var(--ink); min-height:100vh;
   }
   
   .topbar{ position:sticky; top:0; z-index:50; backdrop-filter:blur(20px); background:rgba(10,14,39,.75); border-bottom:1px solid rgba(201,169,97,.18); box-shadow:0 10px 40px rgba(0,0,0,.3); }
@@ -90,7 +76,7 @@
   
   .field-group{margin-bottom:18px}
   .field-label{ display:flex; align-items:center; gap:8px; color:#e2e8f0; font-size:13px; font-weight:600; margin-bottom:8px; }
-  .field-label . req{color:var(--accent); font-size:14px}
+  .field-label .req{color:var(--accent); font-size:14px}
   .field-hint{color:#94a3b8; font-size:11px; font-weight:400; margin-left:auto}
   
   .input, .textarea, .select{ width:100%; padding:11px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:8px; color:#fff; font-size:13px; font-family:inherit; transition:all .2s; outline:none; }
@@ -145,11 +131,11 @@
   .upload-zone-text strong{color:#fff}
   .upload-zone input{display:none}
   
-  .image-preview-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)), gap:8px; margin-top:10px; }
+  .image-preview-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:8px; margin-top:10px; }
   .image-preview{ position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:#000; border:1px solid rgba(255,255,255,.1); }
   .image-preview img{width:100%; height:100%; object-fit:cover}
   .image-preview .remove-img{ position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%; background:rgba(0,0,0,.7); color:#fff; border:none; cursor:pointer; font-size:10px; display:grid; place-items:center; }
-  .image-preview .img-label{ position:absolute; bottom:0; left:0; right:0; padding:4px 6px; background:linear-gradient(transparent, rgba(0,0,0,.85)), color:#fff; font-size:10px; text-align:left; }
+  .image-preview .img-label{ position:absolute; bottom:0; left:0; right:0; padding:4px 6px; background:linear-gradient(transparent, rgba(0,0,0,.85)); color:#fff; font-size:10px; text-align:left; }
   
   .findings-entry{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:14px; margin-bottom:10px; border-left:3px solid var(--rose); }
   .findings-entry.corrective{border-left-color:var(--emerald)}
@@ -161,8 +147,23 @@
   .preview-toolbar-title i{color:var(--accent)}
   
   .doc-container-preview { margin: 0 auto; background: #ffffff; }
-  .doc-page{ background:var(--paper); margin: 0 auto 30px auto; padding: 40px; color:var(--ink); font-family:'Plus Jakarta Sans', sans-serif; font-size:11pt; line-height:1.6; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 210mm; max-width: 100%; }
-  .doc-page.cover-page { display: flex; flex-direction: column; justify-content: space-between; padding: 4mm 40px 60px 40px; min-height: 297mm; }
+  
+  /* PERBAIKAN: Padding dipindah ke sini agar bisa diwariskan ke html2canvas dengan rapi */
+  .page-wrapper { position: relative; background: #fff; margin: 0 auto 30px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 15mm 20mm; }
+  
+  .page-portrait { width: 210mm; min-height: 297mm; }
+  .page-landscape { width: 297mm; min-height: 210mm; }
+  
+  .page-content { color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11pt; line-height: 1.6; }
+  
+  /* PERBAIKAN: Padding kiri-kanan di-lock ke 20mm agar header sejajar dengan isi */
+  .doc-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:14px; margin-bottom:25px; border-bottom: 1px solid var(--border); font-size: 9pt; color: var(--slate); }
+  .doc-header-left { font-weight: 600; }
+  .doc-header-right { font-weight: 700; color: var(--accent-deep); }
+  .doc-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; display: flex; justify-content: space-between; align-items: center; font-size: 9pt; color: var(--slate); border-top: 1px solid var(--border); padding-top: 8px; }
+  
+  /* PERBAIKAN: Cover dan TOC tidak memerlukan padding karena dipindah ke page-wrapper */
+  .cover-page { display: flex; flex-direction: column; justify-content: space-between; min-height: 297mm; }
   
   .cover-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; }
   .cover-body { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 0; }
@@ -184,11 +185,23 @@
   .toc-text { font-weight: 600; color: var(--ink); }
   .toc-page { font-family: 'JetBrains Mono', monospace; color: var(--accent-deep); font-weight: 700; }
   
-  .doc-header{ display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; margin-bottom:25px; }
   .doc-section{margin-bottom:25px;}
   .doc-section-title{ display:flex; align-items:center; gap:10px; font-size:12pt; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; padding-bottom:6px; border-bottom:2px solid var(--accent); }
   .doc-section-title::before{ content:''; width:4px; height:16px; background:var(--accent); border-radius:2px; }
   .doc-section-title .num{ font-family:'JetBrains Mono', monospace; color:var(--accent-deep); font-size:11pt; font-weight:700; }
+  
+  .doc-paragraph { margin: 0 0 10px 0; }
+  .doc-paragraph strong { display: block; margin-bottom: 4px; font-size: 11pt; color: var(--ink); }
+  .doc-paragraph-justify {
+    text-align: justify; 
+    text-justify: inter-word;
+    padding-left: 15px; 
+    border-left: 3px solid var(--paper-deep); 
+    margin-top: 5px;
+  }
+  .doc-paragraph-justify p {
+    margin: 0 0 8px 0;
+  }
   
   .info-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:0; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
   .info-cell{ padding:12px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
@@ -199,20 +212,20 @@
   .info-cell .value.empty{color:var(--slate-light); font-style:italic; font-weight:400}
   
   .doc-table, .checklist-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: 10pt; margin-bottom: 10px; table-layout: fixed; word-wrap: break-word; }
-  .doc-table th, .checklist-table th { background: var(--paper-deep); color: var(--ink); padding: 10px 12px; text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; border-bottom: 1px solid var(--border); word-wrap: break-word; }
+  .doc-table th, .checklist-table th { background: var(--paper-deep); color: var(--ink); padding: 10px 12px; text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; border-bottom: 1px solid var(--border); word-wrap: break-word; vertical-align: top; }
   .doc-table td, .checklist-table td { padding: 10px 12px; border-top: 1px solid var(--border-soft); vertical-align: top; word-wrap: break-word; white-space: normal; }
-  .doc-table tr, .checklist-table tr { page-break-inside: avoid; }
+  .doc-table tr, .checklist-table tr { page-break-inside: avoid !important; }
   .doc-table tr:nth-child(even) td, .checklist-table tr:nth-child(even) td {background:var(--paper-warm)}
   .doc-table .center{text-align:center}
   
-  .excel-display-table { width: 100%; border-collapse: collapse; font-size: 9pt; background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; table-layout: fixed; word-wrap: break-word; }
+  .excel-display-table { width: 100%; border-collapse: collapse; font-size: 9pt; background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word; }
   .excel-display-table th { background: var(--paper-deep); padding: 8px 10px; text-align: left; border: 1px solid var(--border); font-weight: 700; font-size: 9pt; word-wrap: break-word; }
   .excel-display-table td { padding: 6px 10px; border: 1px solid var(--border-soft); font-size: 9pt; word-wrap: break-word; white-space: normal; }
-  .excel-display-table tr { page-break-inside: avoid; }
+  .excel-display-table tr { page-break-inside: avoid !important; }
   
-  .word-content-display { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; padding: 15px; }
+  .word-content-display { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; padding: 15px; page-break-inside: avoid; }
   .word-doc-view p { margin: 0 0 10px 0; line-height: 1.5; }
-  .word-doc-view img { max-width: 100%; height: auto; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border); }
+  .word-doc-view img { max-width: 100% !important; height: auto !important; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border); page-break-inside: avoid; }
   
   .findings-card{ border:1px solid var(--border); border-radius:6px; background:#fff; padding:15px; margin-bottom:12px; border-left:4px solid var(--rose); page-break-inside: avoid; }
   .findings-card.corrective{border-left-color:var(--emerald)}
@@ -220,7 +233,7 @@
   .findings-card-title{font-weight:700; color:var(--ink); font-size:11pt}
   .findings-card-meta{font-size:9pt; color:var(--slate); margin-top:2px}
   .findings-card-body{font-size:10pt; color:var(--ink-2); line-height:1.5; margin-top:8px}
-  .findings-card-body strong{color:var(--ink)}
+  .findings-card-body strong{color:var(--ink); display:block; margin-bottom:4px;}
   
   .doc-images{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; page-break-inside: avoid; }
   .doc-image{ border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
@@ -244,17 +257,6 @@
   .toast{ position:fixed; bottom:24px; right:24px; padding:14px 20px; background:linear-gradient(135deg,var(--ink),var(--ink-2)); color:#fff; border-radius:10px; border-left:3px solid var(--accent); box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:200; transform:translateY(100px); opacity:0; transition:all .3s; font-size:13px; font-weight:500; display:flex; align-items:center; gap:10px; }
   .toast.show{transform:translateY(0); opacity:1}
   .toast i{color:var(--accent)}
-  
-  @media print {
-    body { background: #fff; }
-    .topbar, .sidebar, .editor, .preview-toolbar, .no-print { display: none !important; }
-    .preview-modal { position: static; background: #fff; padding: 0; display: block !important; overflow: visible; }
-    .doc-container-preview { width: 100%; box-shadow: none; }
-    .doc-page { width: 100%; max-width: 100%; box-shadow: none; margin: 0; padding: 15mm; page-break-after: always; }
-    .doc-page:last-child { page-break-after: auto; }
-    .doc-page.cover-page { min-height: auto; height: auto; padding: 4mm 15mm 15mm 15mm; }
-    .doc-section, .findings-card, .doc-images, .sign-block, tr, img { page-break-inside: avoid; }
-  }
 </style>
 </head>
 <body>
@@ -266,7 +268,7 @@
         <img src="https://z-cdn-media.chatglm.cn/files/0a5b250c-30d6-4f48-9b93-0068d0dbe63d.png?auth_key=1887235523-3cbd4caeda3f42098a81ed8460a0247c-0-1de642983adf9f733a255b7979c3fd15" alt="MII Logo">
       </div>
       <div>
-        <div class="brand-title">Maintenance Report System</div>
+        <div class="brand-title">HSS2 - PT. Mitra Integrasi Informatika</div>
         <div class="brand-sub">Server · Storage · SAN Switch</div>
       </div>
     </div>
@@ -409,18 +411,26 @@
     </section>
     
     <section class="form-section" id="sec-equipment">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
-        <p style="color:#cbd5e1; font-size:13px; margin:0">Upload file Excel (List Hardware) & Word (Details & Photo) untuk setiap peralatan.</p>
-        <div style="display:flex; gap:6px">
-          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('server')"><i class="fas fa-plus"></i> Server</button>
-          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('storage')"><i class="fas fa-plus"></i> Storage</button>
-          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('san')"><i class="fas fa-plus"></i> SAN Switch</button>
+      <div style="margin-bottom: 20px; padding: 15px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(15,118,110,.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <h4 style="margin:0; color:#5eead4; font-size:14px;"><i class="fas fa-file-excel"></i> Excel Files (Hardware List)</h4>
+          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('excel')"><i class="fas fa-plus"></i> Add Excel File</button>
+        </div>
+        <div id="excelEquipmentList"></div>
+        <div id="excelEquipmentEmpty" class="empty-state" style="color:#64748b; border: 1px dashed rgba(255,255,255,.1); padding: 15px; border-radius: 8px;">
+          Belum ada file Excel ditambahkan.
         </div>
       </div>
-      <div id="equipmentList"></div>
-      <div id="equipmentEmpty" class="empty-state" style="color:#64748b">
-        <i class="fas fa-server" style="font-size:32px; opacity:.4; display:block; margin-bottom:8px"></i>
-        Belum ada peralatan ditambahkan. Klik tombol di atas untuk menambah.
+
+      <div style="padding: 15px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(168, 50, 78, .05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <h4 style="margin:0; color:#fca5b8; font-size:14px;"><i class="fas fa-file-word"></i> Word Files (Details & Photo)</h4>
+          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('word')"><i class="fas fa-plus"></i> Add Word File</button>
+        </div>
+        <div id="wordEquipmentList"></div>
+        <div id="wordEquipmentEmpty" class="empty-state" style="color:#64748b; border: 1px dashed rgba(255,255,255,.1); padding: 15px; border-radius: 8px;">
+          Belum ada file Word ditambahkan.
+        </div>
       </div>
     </section>
     
@@ -481,7 +491,7 @@
     <div class="preview-toolbar-title"><i class="fas fa-file-alt"></i> Document Preview</div>
     <div style="display:flex; gap:8px">
       <button class="tool-btn tool-btn-ghost" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
-      <button class="tool-btn tool-btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print / Save as PDF</button>
+      <button class="tool-btn tool-btn-primary" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
     </div>
   </div>
   <div class="doc-container-preview" id="docContainer"></div>
@@ -498,6 +508,7 @@ const state = {
     engineer:'', customer:'', location:'', priority:'Normal',
     objective:'Melakukan preventive maintenance rutin untuk infrastruktur sistem guna memastikan ketersediaan dan keandalan peralatan',
     summary:'', notes:'',
+    projectName:'', contractNo:'', period:'',
     hardwareTypes: ['server', 'storage', 'san']
   },
   equipment: [],
@@ -507,69 +518,11 @@ const state = {
 };
 
 const CHECKLIST_DEFS = {
-  server: {
-    label:'Server Checklist',
-    icon:'fa-server',
-    items:[
-      'Periksa kondisi fisik server (bentuk, kebersihan, kerusakan)',
-      'Periksa status LED indikator depan panel',
-      'Cek log system dan event logs untuk error',
-      'Periksa koneksi power supply (redundansi)',
-      'Verifikasi status fan dan suhu internal',
-      'Periksa kabel power dan kabel data (rapi & tertata)',
-      'Cek penggunaan CPU, Memory, dan Disk utilization',
-      'Verifikasi status RAID controller dan logical drive',
-      'Periksa status Network Interface Card (NIC)',
-      'Update firmware / BIOS / iLO bila diperlukan',
-      'Lakukan backup konfigurasi system',
-      'Periksa akses remote management (iLO/iDRAC)',
-      'Test failover bila konfigurasi cluster aktif',
-      'Pastikan label equipment terpasang dengan benar'
-    ]
-  },
-  storage: {
-    label:'Storage Checklist',
-    icon:'fa-database',
-    items:[
-      'Periksa kondisi fisik storage array',
-      'Periksa status LED controller dan disk tray',
-      'Verifikasi kapasitas storage yang tersedia',
-      'Periksa status RAID group dan hot spare disk',
-      'Cek health status setiap disk (SED/SSD/HDD)',
-      'Periksa replication status (bila ada)',
-      'Verifikasi koneksi FC/iSCSI ke host',
-      'Cek storage cache dan battery status',
-      'Periksa event log storage array',
-      'Lakukan storage performance monitoring',
-      'Verifikasi snapshot schedule dan status',
-      'Periksa suhu dan kelembaban storage room',
-      'Backup konfigurasi storage array',
-      'Verifikasi LUN masking dan zoning'
-    ]
-  },
-  san: {
-    label:'SAN Switch Checklist',
-    icon:'fa-network-wired',
-    items:[
-      'Periksa kondisi fisik SAN switch',
-      'Periksa status LED indikator semua port',
-      'Verifikasi status semua port (online/offline)',
-      'Cek log fabric untuk error atau warning',
-      'Periksa koneksi fiber optic cable',
-      'Verifikasi zoning configuration',
-      'Periksa fabric topology dan ISL link',
-      'Cek SFP transceiver status setiap port',
-      'Periksa power supply redundansi',
-      'Verifikasi firmware version switch',
-      'Backup switch configuration',
-      'Cek suhu internal switch',
-      'Periksa domain ID dan fabric name',
-      'Test connectivity end-to-end'
-    ]
-  }
+  server: { label:'Server Checklist', icon:'fa-server', items:['Periksa kondisi fisik server','Periksa status LED indikator depan panel','Cek log system dan event logs untuk error','Periksa koneksi power supply (redundansi)','Verifikasi status fan dan suhu internal','Periksa kabel power dan kabel data','Cek penggunaan CPU, Memory, dan Disk utilization','Verifikasi status RAID controller dan logical drive','Periksa status Network Interface Card (NIC)','Update firmware / BIOS / iLO bila diperlukan','Lakukan backup konfigurasi system','Periksa akses remote management (iLO/iDRAC)','Test failover bila konfigurasi cluster aktif','Pastikan label equipment terpasang dengan benar'] },
+  storage: { label:'Storage Checklist', icon:'fa-database', items:['Periksa kondisi fisik storage array','Periksa status LED controller dan disk tray','Verifikasi kapasitas storage yang tersedia','Periksa status RAID group dan hot spare disk','Cek health status setiap disk (SED/SSD/HDD)','Periksa replication status (bila ada)','Verifikasi koneksi FC/iSCSI ke host','Cek storage cache dan battery status','Periksa event log storage array','Lakukan storage performance monitoring','Verifikasi snapshot schedule dan status','Periksa suhu dan kelembaban storage room','Backup konfigurasi storage array','Verifikasi LUN masking dan zoning'] },
+  san: { label:'SAN Switch Checklist', icon:'fa-network-wired', items:['Periksa kondisi fisik SAN switch','Periksa status LED indikator semua port','Verifikasi status semua port (online/offline)','Cek log fabric untuk error atau warning','Periksa koneksi fiber optic cable','Verifikasi zoning configuration','Periksa fabric topology dan ISL link','Cek SFP transceiver status setiap port','Periksa power supply redundansi','Verifikasi firmware version switch','Backup switch configuration','Cek suhu internal switch','Periksa domain ID dan fabric name','Test connectivity end-to-end'] }
 };
 
-// Fungsi untuk mendapatkan teks hardware yang dipilih
 function getSelectedHardwareText() {
   let hwParts = [];
   if (state.report.hardwareTypes.includes('server')) hwParts.push('Server');
@@ -595,7 +548,6 @@ function updateHardwareSelection() {
   state.report.hardwareTypes = tempTypes;
   renderChecklists();
   
-  // Update teks Objective secara otomatis berdasarkan pilihan hardware
   const hwText = getSelectedHardwareText();
   state.report.objective = `Melakukan preventive maintenance rutin untuk infrastruktur sistem (${hwText}) guna memastikan ketersediaan dan keandalan peralatan`;
   document.getElementById('f_objective').value = state.report.objective;
@@ -622,19 +574,21 @@ const fieldMap = {
   f_objective:'objective', f_projectName:'projectName', f_contractNo:'contractNo',
   f_period:'period'
 };
+
 Object.entries(fieldMap).forEach(([id,key])=>{
   const el = document.getElementById(id);
-  el.addEventListener('input', ()=>{
-    state.report[key] = el.value;
+  el.addEventListener('input', (e)=>{
+    state.report[key] = e.target.value;
     updateProgress();
   });
 });
+
 const sigFields = ['prepName','prepRole','revName','revRole','ackName','ackRole'];
 sigFields.forEach(k=>{
   const id = 'f_'+k;
   const el = document.getElementById(id);
-  el.addEventListener('input', ()=>{
-    state.signatures[k] = el.value;
+  el.addEventListener('input', (e)=>{
+    state.signatures[k] = e.target.value;
     updateProgress();
   });
 });
@@ -647,11 +601,11 @@ function generateAutoSummary() {
   let summary = `Pada tanggal ${dateStr}, telah dilakukan ${r.type || 'maintenance'} untuk infrastruktur (${hwText}). `;
 
   if (state.findings.length > 0) {
-    summary += `Ditemukan beberapa temuan issue pada perangkat, yaitu: `;
+    summary += `Ditemukan beberapa temuan issue pada perangkat, yaitu:\n`;
     state.findings.forEach((f, i) => {
       summary += `${i+1}. ${f.equipment || 'Equipment'} - ${f.description || 'No description'}`;
-      if (f.action) summary += ` (Tindakan: ${f.action}). `;
-      else summary += '. ';
+      if (f.action) summary += ` (Tindakan: ${f.action}).\n`;
+      else summary += '.\n';
     });
   } else {
     summary += `Tidak ditemukan issue pada perangkat. Secara keseluruhan perangkat dalam keadaan normal dan siap dioperasikan.`;
@@ -660,11 +614,11 @@ function generateAutoSummary() {
   state.report.summary = summary;
 
   if (state.findings.length > 0) {
-    let notes = `Berdasarkan temuan yang ditemukan, berikut adalah informasi dan rekomendasi: `;
+    let notes = `Berdasarkan temuan yang ditemukan, berikut adalah informasi dan rekomendasi:\n`;
     state.findings.forEach((f, i) => {
-      notes += `${i+1}. Pada ${f.equipment || 'Equipment'}: ${f.description || 'No description'}. `;
-      if (f.rootCause) notes += `Root cause: ${f.rootCause}. `;
-      if (f.action) notes += `Rekomendasi/Tindakan: ${f.action}. `;
+      notes += `${i+1}. Pada ${f.equipment || 'Equipment'}: ${f.description || 'No description'}.\n`;
+      if (f.rootCause) notes += `Root cause: ${f.rootCause}.\n`;
+      if (f.action) notes += `Rekomendasi/Tindakan: ${f.action}.\n`;
     });
     state.report.notes = notes;
   } else {
@@ -673,56 +627,67 @@ function generateAutoSummary() {
 }
 
 let eqCounter = 0;
-function addEquipment(type){
+function addEquipment(fileType){
   eqCounter++;
   const id = 'eq_'+eqCounter;
-  const labels = {server:'Server', storage:'Storage', san:'SAN Switch'};
-  const tagClass = {server:'tag-server', storage:'tag-storage', san:'tag-san'};
-  const icons = {server:'fa-server', storage:'fa-database', san:'fa-network-wired'};
   
-  const eq = { id, type, excelData:null, excelName:'', wordContent:'', wordName:'' };
+  const eq = { id, type:'generic', excelData:null, excelName:'', wordContent:'', wordName:'', fileType: fileType };
   state.equipment.push(eq);
   
   const card = document.createElement('div');
   card.className = 'equipment-card';
   card.id = 'card_'+id;
-  card.innerHTML = `
-    <div class="equipment-card-head">
-      <span class="equipment-tag ${tagClass[type]}"><i class="fas ${icons[type]}"></i> ${labels[type]}</span>
-      <button class="btn-remove" onclick="removeEquipment('${id}')"><i class="fas fa-trash"></i></button>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Equipment List (Excel) <span class="field-hint">.xlsx, .xls, .csv</span></label>
-      <div class="upload-zone" id="exceldrop_${id}" style="padding:12px">
-        <i class="fas fa-file-excel"></i>
-        <div class="upload-zone-text" id="exceltxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Excel</div>
-        <input type="file" accept=".xlsx,.xls,.csv" onchange="uploadExcel('${id}', this.files)">
-      </div>
-      <div id="excelPreview_${id}" style="margin-top:10px;"></div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Equipment Details & Photo (Word) <span class="field-hint">.docx, .doc</span></label>
-      <div class="upload-zone" id="worddrop_${id}" style="padding:12px">
-        <i class="fas fa-file-word"></i>
-        <div class="upload-zone-text" id="wordtxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Word</div>
-        <input type="file" accept=".docx,.doc" onchange="uploadWord('${id}', this.files)">
-      </div>
-    </div>
-  `;
-  document.getElementById('equipmentList').appendChild(card);
-  document.getElementById('equipmentEmpty').style.display = 'none';
   
-  const excelDrop = document.getElementById('exceldrop_'+id);
-  excelDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') excelDrop.querySelector('input').click(); });
-  excelDrop.addEventListener('dragover', e=>{ e.preventDefault(); excelDrop.classList.add('dragover'); });
-  excelDrop.addEventListener('dragleave', ()=> excelDrop.classList.remove('dragover'));
-  excelDrop.addEventListener('drop', e=>{ e.preventDefault(); excelDrop.classList.remove('dragover'); uploadExcel(id, e.dataTransfer.files); });
+  const labels = { excel: 'Hardware List (Excel)', word: 'Details & Photo (Word)' };
+  const tagClass = { excel: 'tag-storage', word: 'tag-san' };
+  const icons = { excel: 'fa-file-excel', word: 'fa-file-word' };
 
-  const wordDrop = document.getElementById('worddrop_'+id);
-  wordDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') wordDrop.querySelector('input').click(); });
-  wordDrop.addEventListener('dragover', e=>{ e.preventDefault(); wordDrop.classList.add('dragover'); });
-  wordDrop.addEventListener('dragleave', ()=> wordDrop.classList.remove('dragover'));
-  wordDrop.addEventListener('drop', e=>{ e.preventDefault(); wordDrop.classList.remove('dragover'); uploadWord(id, e.dataTransfer.files); });
+  if (fileType === 'excel') {
+    card.innerHTML = `
+      <div class="equipment-card-head">
+        <span class="equipment-tag ${tagClass[fileType]}"><i class="fas ${icons[fileType]}"></i> ${labels[fileType]}</span>
+        <button class="btn-remove" onclick="removeEquipment('${id}')"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="field-group">
+        <div class="upload-zone" id="exceldrop_${id}" style="padding:12px">
+          <i class="fas fa-file-excel"></i>
+          <div class="upload-zone-text" id="exceltxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Excel</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="uploadExcel('${id}', this.files)">
+        </div>
+        <div id="excelPreview_${id}" style="margin-top:10px;"></div>
+      </div>
+    `;
+    document.getElementById('excelEquipmentList').appendChild(card);
+    document.getElementById('excelEquipmentEmpty').style.display = 'none';
+    
+    const excelDrop = document.getElementById('exceldrop_'+id);
+    excelDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') excelDrop.querySelector('input').click(); });
+    excelDrop.addEventListener('dragover', e=>{ e.preventDefault(); excelDrop.classList.add('dragover'); });
+    excelDrop.addEventListener('dragleave', ()=> excelDrop.classList.remove('dragover'));
+    excelDrop.addEventListener('drop', e=>{ e.preventDefault(); excelDrop.classList.remove('dragover'); uploadExcel(id, e.dataTransfer.files); });
+  } else {
+    card.innerHTML = `
+      <div class="equipment-card-head">
+        <span class="equipment-tag ${tagClass[fileType]}"><i class="fas ${icons[fileType]}"></i> ${labels[fileType]}</span>
+        <button class="btn-remove" onclick="removeEquipment('${id}')"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="field-group">
+        <div class="upload-zone" id="worddrop_${id}" style="padding:12px">
+          <i class="fas fa-file-word"></i>
+          <div class="upload-zone-text" id="wordtxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Word</div>
+          <input type="file" accept=".docx,.doc" onchange="uploadWord('${id}', this.files)">
+        </div>
+      </div>
+    `;
+    document.getElementById('wordEquipmentList').appendChild(card);
+    document.getElementById('wordEquipmentEmpty').style.display = 'none';
+    
+    const wordDrop = document.getElementById('worddrop_'+id);
+    wordDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') wordDrop.querySelector('input').click(); });
+    wordDrop.addEventListener('dragover', e=>{ e.preventDefault(); wordDrop.classList.add('dragover'); });
+    wordDrop.addEventListener('dragleave', ()=> wordDrop.classList.remove('dragover'));
+    wordDrop.addEventListener('drop', e=>{ e.preventDefault(); wordDrop.classList.remove('dragover'); uploadWord(id, e.dataTransfer.files); });
+  }
   
   updateProgress();
   generateAutoSummary();
@@ -799,9 +764,17 @@ function uploadWord(eqId, files) {
 }
 
 function removeEquipment(id){
+  const eq = state.equipment.find(e=>e.id===id);
+  if (!eq) return;
   state.equipment = state.equipment.filter(e=>e.id!==id);
   document.getElementById('card_'+id).remove();
-  if(state.equipment.length===0) document.getElementById('equipmentEmpty').style.display='block';
+  
+  const excelEqs = state.equipment.filter(e => e.fileType === 'excel');
+  const wordEqs = state.equipment.filter(e => e.fileType === 'word');
+  
+  if(excelEqs.length === 0) document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  if(wordEqs.length === 0) document.getElementById('wordEquipmentEmpty').style.display = 'block';
+  
   updateProgress();
   generateAutoSummary();
 }
@@ -906,17 +879,53 @@ function openPreview(){ generateAutoSummary(); generateDocument(); document.getE
 function closePreview(){ document.getElementById('previewModal').classList.remove('active'); document.body.style.overflow = ''; }
 function fmtDate(d){ if(!d) return '—'; const dt = new Date(d); const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return dt.getDate()+' '+months[dt.getMonth()]+' '+dt.getFullYear(); }
 
+function createPageWrapper(orientation, pageNumber, isFrontMatter = false) {
+  const page = document.createElement('div');
+  page.className = `page-wrapper page-${orientation}`;
+  
+  const docHeader = `
+    <div class="doc-header">
+      <div class="doc-header-left">${escapeHtml(state.report.customer) || 'Customer'}</div>
+      <div class="doc-header-right">PT. Mitra Integrasi Informatika</div>
+    </div>
+  `;
+  
+  let docFooter = '';
+  if (!isFrontMatter) {
+    docFooter = `
+      <div class="doc-footer">
+        <div>Report ID: ${escapeHtml(state.report.id) || 'N/A'}</div>
+        <div>Page ${pageNumber}</div>
+      </div>
+    `;
+  }
+  
+  page.innerHTML = `${docHeader}<div class="page-content" id="pageContent_${pageNumber}"></div>${docFooter}`;
+  return page;
+}
+
+function formatJustifiedParagraph(text) {
+  if (!text) return '';
+  return text.split('\n').map(line => {
+    const trimmedLine = line.trim();
+    if (trimmedLine) {
+      return `<p>${escapeHtml(trimmedLine)}</p>`;
+    }
+    return '';
+  }).join('');
+}
+
 function generateDocument(){
   const r = state.report;
-  const catClass = r.type.toLowerCase().includes('corrective') ? 'corrective' : 'preventive';
   const coverSubtitle = 'Infrastruktur ' + getSelectedHardwareText();
   
   const container = document.getElementById('docContainer');
   container.innerHTML = ''; 
+  let currentPageNum = 1;
 
   // 1. Cover
   const coverPage = document.createElement('div');
-  coverPage.className = 'doc-page cover-page';
+  coverPage.className = 'page-wrapper page-portrait cover-page';
   coverPage.innerHTML = `
     <div class="cover-header"></div>
     <div class="cover-body">
@@ -936,21 +945,27 @@ function generateDocument(){
 
   // 2. Daftar Isi
   const tocPage = document.createElement('div');
-  tocPage.className = 'doc-page';
-  let tocHtml = `<div class="toc-title">Daftar Isi</div><ul class="toc-list"><li class="toc-item"><span class="toc-text">1. Report Information</span><span class="toc-page">3</span></li>`;
-  if (r.objective || r.summary) tocHtml += `<li class="toc-item"><span class="toc-text">2. Description & Summary</span><span class="toc-page">3</span></li>`;
-  const filteredEquipment = state.equipment.filter(e => r.hardwareTypes.includes(e.type));
-  if (filteredEquipment.length > 0) tocHtml += `<li class="toc-item"><span class="toc-text">3. Equipment List & Details</span><span class="toc-page">4</span></li>`;
-  tocHtml += `<li class="toc-item"><span class="toc-text">4. Maintenance Checklist (Verified)</span><span class="toc-page">5</span></li>`;
-  tocHtml += `<li class="toc-item"><span class="toc-text">5. Findings & Corrective Actions</span><span class="toc-page">6</span></li>`;
-  if (r.notes) tocHtml += `<li class="toc-item"><span class="toc-text">6. Notes & Recommendations</span><span class="toc-page">7</span></li>`;
-  tocHtml += `<li class="toc-item"><span class="toc-text">${r.notes ? '7' : '6'}. Acknowledgment</span><span class="toc-page">${r.notes ? '7' : '6'}</span></li></ul>`;
+  tocPage.className = 'page-wrapper page-portrait';
+  let tocHtml = `<div class="page-content"><div class="toc-title">Daftar Isi</div><ul class="toc-list"><li class="toc-item"><span class="toc-text">1. Report Information</span><span class="toc-page">1</span></li>`;
+  if (r.objective || r.summary) tocHtml += `<li class="toc-item"><span class="toc-text">2. Description & Summary</span><span class="toc-page">1</span></li>`;
+  
+  const excelFiles = state.equipment.filter(e => e.fileType === 'excel' && e.excelData);
+  const wordFiles = state.equipment.filter(e => e.fileType === 'word' && e.wordContent);
+  
+  let nextPage = 2;
+  if (excelFiles.length > 0) { tocHtml += `<li class="toc-item"><span class="toc-text">3. Equipment List (Excel)</span><span class="toc-page">${nextPage}</span></li>`; nextPage++; }
+  if (wordFiles.length > 0) { tocHtml += `<li class="toc-item"><span class="toc-text">4. Equipment Details (Word)</span><span class="toc-page">${nextPage}</span></li>`; nextPage++; }
+  
+  tocHtml += `<li class="toc-item"><span class="toc-text">5. Maintenance Checklist</span><span class="toc-page">${nextPage}</span></li>`;
+  tocHtml += `<li class="toc-item"><span class="toc-text">6. Findings & Corrective Actions</span><span class="toc-page">${nextPage}</span></li>`;
+  if (r.notes) tocHtml += `<li class="toc-item"><span class="toc-text">7. Notes & Recommendations</span><span class="toc-page">${nextPage}</span></li>`;
+  tocHtml += `<li class="toc-item"><span class="toc-text">${r.notes ? '8' : '7'}. Acknowledgment</span><span class="toc-page">${nextPage}</span></li></ul></div>`;
   tocPage.innerHTML = tocHtml;
   container.appendChild(tocPage);
 
-  // 3. Konten Utama
+  // 3. Halaman Utama
+  const mainPage = createPageWrapper('portrait', currentPageNum);
   let mainContent = `
-    <div class="doc-header"></div>
     <div class="doc-section">
       <div class="doc-section-title"><span class="num">01</span> Report Information</div>
       <div class="info-grid">
@@ -967,38 +982,53 @@ function generateDocument(){
     ${(r.objective || r.summary) ? `
     <div class="doc-section">
       <div class="doc-section-title"><span class="num">02</span> Description &amp; Summary</div>
-      ${r.objective ? `<p style="margin:0 0 10px 0"><strong>Objective:</strong> ${escapeHtml(r.objective)}</p>` : ''}
-      ${r.summary ? `<p style="margin:0"><strong>Executive Summary:</strong> ${escapeHtml(r.summary)}</p>` : ''}
+      ${r.objective ? `<p class="doc-paragraph"><strong>Objective:</strong> ${escapeHtml(r.objective)}</p>` : ''}
+      ${r.summary ? `<p class="doc-paragraph"><strong>Executive Summary:</strong></p><div class="doc-paragraph-justify">${formatJustifiedParagraph(r.summary)}</div>` : ''}
     </div>` : ''}
   `;
+  mainPage.querySelector('.page-content').innerHTML = mainContent;
+  container.appendChild(mainPage);
+  currentPageNum++;
 
-  // 4. Equipment List (Difilter)
-  if(filteredEquipment.length > 0) {
-    let equipContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">03</span> Equipment List &amp; Details</div>`;
-    filteredEquipment.forEach((e, idx) => {
-      const typeLabel = e.type === 'san' ? 'SAN Switch' : e.type.charAt(0).toUpperCase()+e.type.slice(1);
-      let excelHtml = '';
+  // 4. Halaman Excel
+  if(excelFiles.length > 0) {
+    const excelPage = createPageWrapper('landscape', currentPageNum);
+    let excelContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">03</span> Equipment List (Excel)</div>`;
+    
+    excelFiles.forEach((e, idx) => {
       if (e.excelData && e.excelData.length > 0) {
         const headers = e.excelData[0] || [];
         const rows = e.excelData.slice(1).filter(r => r.some(c => c !== null && c !== ''));
-        excelHtml = '<table class="excel-display-table"><thead><tr>';
-        headers.forEach(h => excelHtml += `<th>${escapeHtml(String(h || ''))}</th>`);
-        excelHtml += '</tr></thead><tbody>';
-        rows.forEach(r => { excelHtml += '<tr>'; headers.forEach((_, i) => excelHtml += `<td>${escapeHtml(String(r[i] !== undefined ? r[i] : ''))}</td>`); excelHtml += '</tr>'; });
-        excelHtml += '</tbody></table>';
+        excelContent += '<table class="excel-display-table"><thead><tr>';
+        headers.forEach(h => excelContent += `<th>${escapeHtml(String(h || ''))}</th>`);
+        excelContent += '</tr></thead><tbody>';
+        rows.forEach(r => { excelContent += '<tr>'; headers.forEach((_, i) => excelContent += `<td>${escapeHtml(String(r[i] !== undefined ? r[i] : ''))}</td>`); excelContent += '</tr>'; });
+        excelContent += '</tbody></table>';
       }
-      let wordHtml = e.wordContent ? `<div class="word-content-display"><div class="word-doc-view">${e.wordContent}</div></div>` : '';
-      equipContent += `<div style="margin-bottom:14px; padding:12px; background:#fff; border-radius:6px; border:1px solid var(--border-soft);"><div style="font-weight:700; color:var(--ink); margin-bottom:6px; display:flex; justify-content:space-between;"><span>${idx+1}. ${typeLabel}</span></div><div style="margin-bottom:8px;">${excelHtml}</div><div>${wordHtml}</div></div>`;
     });
-    equipContent += `</div>`;
-    const equipPage = document.createElement('div');
-    equipPage.className = `doc-page`;
-    equipPage.innerHTML = mainContent + equipContent;
-    container.appendChild(equipPage);
-    mainContent = ''; 
+    excelContent += `</div>`;
+    excelPage.querySelector('.page-content').innerHTML = excelContent;
+    container.appendChild(excelPage);
+    currentPageNum++;
   }
 
-  // 5. Checklist (Difilter)
+  // 5. Halaman Word
+  if(wordFiles.length > 0) {
+    const wordPage = createPageWrapper('portrait', currentPageNum);
+    let wordHtmlContainer = `<div class="doc-section"><div class="doc-section-title"><span class="num">04</span> Equipment Details & Photos (Word)</div>`;
+    
+    wordFiles.forEach((e, idx) => {
+      let wordHtml = e.wordContent ? `<div class="word-content-display"><div class="word-doc-view">${e.wordContent}</div></div>` : '';
+      wordHtmlContainer += `<div style="margin-bottom:14px; padding:12px; background:#fff; border-radius:6px; border:1px solid var(--border-soft);"><div>${wordHtml}</div></div>`;
+    });
+    
+    wordHtmlContainer += `</div>`;
+    wordPage.querySelector('.page-content').innerHTML = wordHtmlContainer;
+    container.appendChild(wordPage);
+    currentPageNum++;
+  }
+
+  // 6. Halaman Checklist
   const checkedItems = [];
   Object.entries(CHECKLIST_DEFS).forEach(([key, def])=>{
     if(r.hardwareTypes && r.hardwareTypes.includes(key)) {
@@ -1007,31 +1037,101 @@ function generateDocument(){
       }
     }
   });
-  let checkContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">04</span> Maintenance Checklist (Verified)</div>${checkedItems.length === 0 ? '<div class="empty-state">No checklist items verified</div>' : `<table class="checklist-table"><thead><tr><th style="width:30px">#</th><th style="width:80px">Category</th><th>Check Item</th><th style="width:30%">Remarks</th></tr></thead><tbody>${checkedItems.map((c, i)=>`<tr><td>${i+1}</td><td><span style="font-size:8pt;font-weight:600;color:var(--slate)">${c.category.replace(' Checklist','')}</span></td><td>${c.item}</td><td>${c.remark ? escapeHtml(c.remark) : '<span style="color:var(--slate-light)">—</span>'}</td></tr>`).join('')}</tbody></table>`}</div>`;
-  const checkPage = document.createElement('div');
-  checkPage.className = `doc-page`;
-  checkPage.innerHTML = mainContent + checkContent;
+  const checkPage = createPageWrapper('portrait', currentPageNum);
+  let checkContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">05</span> Maintenance Checklist (Verified)</div>${checkedItems.length === 0 ? '<div class="empty-state">No checklist items verified</div>' : `<table class="checklist-table"><thead><tr><th style="width:40px; text-align:center;">No.</th><th style="width:120px">Category</th><th>Check Item</th><th style="width:35%">Remarks</th></tr></thead><tbody>${checkedItems.map((c, i)=>`<tr><td style="text-align:center; vertical-align:top;">${i+1}</td><td style="vertical-align:top;"><span style="font-size:8pt;font-weight:600;color:var(--slate)">${c.category.replace(' Checklist','')}</span></td><td style="vertical-align:top;">${c.item}</td><td style="vertical-align:top;">${c.remark ? escapeHtml(c.remark) : '<span style="color:var(--slate-light)">—</span>'}</td></tr>`).join('')}</tbody></table>`}</div>`;
+  checkPage.querySelector('.page-content').innerHTML = checkContent;
   container.appendChild(checkPage);
-  mainContent = '';
+  currentPageNum++;
 
-  // 6. Findings
-  let findContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">05</span> Findings &amp; Corrective Actions</div>${state.findings.length === 0 ? '<div class="empty-state">No findings recorded</div>' : state.findings.map(f=>{ const typeLabel = {issue:'Issue', corrective:'Corrective Action', recommendation:'Recommendation'}[f.type] || 'Finding'; return `<div class="findings-card ${f.type==='corrective'?'corrective':''}"><div class="findings-card-head"><div><div class="findings-card-title">${escapeHtml(f.equipment) || typeLabel}</div><div class="findings-card-meta">${typeLabel} · Status: <strong>${f.status}</strong></div></div><span class="status-badge ${f.status==='Resolved'?'status-ok':f.status==='Pending'?'status-fail':'status-issue'}">${f.status}</span></div>${f.description ? `<div class="findings-card-body"><strong>Description:</strong> ${escapeHtml(f.description)}</div>` : ''}${f.rootCause ? `<div class="findings-card-body"><strong>Root Cause:</strong> ${escapeHtml(f.rootCause)}</div>` : ''}${f.action ? `<div class="findings-card-body"><strong>Action Taken:</strong> ${escapeHtml(f.action)}</div>` : ''}${f.images.length ? `<div class="doc-images" style="margin-top:8px">${f.images.map(img=>`<div class="doc-image"><img src="${img.data}" alt="${img.name}"><div class="caption">${escapeHtml(img.name)}</div></div>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`;
-  const findPage = document.createElement('div');
-  findPage.className = `doc-page`;
-  findPage.innerHTML = mainContent + findContent;
+  // 7. Halaman Findings
+  const findPage = createPageWrapper('portrait', currentPageNum);
+  let findContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">06</span> Findings &amp; Corrective Actions</div>${state.findings.length === 0 ? '<div class="empty-state">No findings recorded</div>' : state.findings.map(f=>{ const typeLabel = {issue:'Issue', corrective:'Corrective Action', recommendation:'Recommendation'}[f.type] || 'Finding'; return `<div class="findings-card ${f.type==='corrective'?'corrective':''}"><div class="findings-card-head"><div><div class="findings-card-title">${escapeHtml(f.equipment) || typeLabel}</div><div class="findings-card-meta">${typeLabel} · Status: <strong>${f.status}</strong></div></div><span class="status-badge ${f.status==='Resolved'?'status-ok':f.status==='Pending'?'status-fail':'status-issue'}">${f.status}</span></div>${f.description ? `<div class="findings-card-body"><strong>Description:</strong> ${escapeHtml(f.description)}</div>` : ''}${f.rootCause ? `<div class="findings-card-body"><strong>Root Cause:</strong> ${escapeHtml(f.rootCause)}</div>` : ''}${f.action ? `<div class="findings-card-body"><strong>Action Taken:</strong> ${escapeHtml(f.action)}</div>` : ''}${f.images.length ? `<div class="doc-images" style="margin-top:8px">${f.images.map(img=>`<div class="doc-image"><img src="${img.data}" alt="${img.name}"><div class="caption">${escapeHtml(img.name)}</div></div>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`;
+  findPage.querySelector('.page-content').innerHTML = findContent;
   container.appendChild(findPage);
-  mainContent = '';
+  currentPageNum++;
 
-  // 7. Notes & Signatures
-  let signContent = `${state.report.notes ? `<div class="doc-section"><div class="doc-section-title"><span class="num">06</span> Notes &amp; Recommendations</div><p style="margin:0; padding:10px; background:var(--paper-warm); border-radius:6px; border-left:3px solid var(--accent)">${escapeHtml(state.report.notes)}</p></div>` : ''}<div class="doc-section"><div class="doc-section-title"><span class="num">${state.report.notes?'07':'06'}</span> Acknowledgment</div><div class="sign-block"><div class="sign-box"><div class="sign-label">Prepared By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.prepName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.prepRole) || 'Field Engineer'}</div></div></div><div class="sign-box"><div class="sign-label">Reviewed By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.revName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.revRole) || 'Service Manager'}</div></div></div></div><div class="sign-block" style="margin-top:20px"><div class="sign-box"><div class="sign-label">Acknowledged By (Customer)</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.ackName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.ackRole) || 'Customer Representative'}</div></div></div><div class="sign-box"><div class="sign-label">Date</div><div class="sign-line"><div class="sign-name">${fmtDate(r.date)}</div><div class="sign-role">Signature Date</div></div></div></div></div>`;
-  const signPage = document.createElement('div');
-  signPage.className = `doc-page`;
-  signPage.innerHTML = mainContent + signContent;
+  // 8. Halaman Notes & Signatures
+  const signPage = createPageWrapper('portrait', currentPageNum);
+  const notesContent = state.report.notes ? formatJustifiedParagraph(state.report.notes) : '';
+  
+  let signContent = `${state.report.notes ? `<div class="doc-section"><div class="doc-section-title"><span class="num">07</span> Notes &amp; Recommendations</div><div style="padding:15px; background:var(--paper-warm); border-radius:6px; border-left:3px solid var(--accent)">${notesContent}</div></div>` : ''}<div class="doc-section"><div class="doc-section-title"><span class="num">${state.report.notes?'08':'07'}</span> Acknowledgment</div><div class="sign-block"><div class="sign-box"><div class="sign-label">Prepared By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.prepName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.prepRole) || 'Field Engineer'}</div></div></div><div class="sign-box"><div class="sign-label">Reviewed By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.revName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.revRole) || 'Service Manager'}</div></div></div></div><div class="sign-block" style="margin-top:20px"><div class="sign-box"><div class="sign-label">Acknowledged By (Customer)</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.ackName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.ackRole) || 'Customer Representative'}</div></div></div><div class="sign-box"><div class="sign-label">Date</div><div class="sign-line"><div class="sign-name">${fmtDate(r.date)}</div><div class="sign-role">Signature Date</div></div></div></div></div>`;
+  signPage.querySelector('.page-content').innerHTML = signContent;
   container.appendChild(signPage);
 }
 
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function toast(msg){ document.getElementById('toastMsg').textContent = msg; const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 2400); }
+
+// PERBAIKAN UTAMA PDF: Menggunakan metode slicing canvas agar tidak ada konten/teks yang terpotong acak
+async function exportToPDF() {
+  toast('Generating PDF, mungkin butuh beberapa saat...');
+  
+  const { jsPDF } = window.jspdf;
+  const pages = document.querySelectorAll('#docContainer .page-wrapper');
+  
+  if (pages.length === 0) return;
+
+  // Buat dokumen PDF A4 tanpa margin default dari jsPDF
+  const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+  });
+
+  const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+  const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const isLandscape = page.classList.contains('page-landscape');
+    
+    // Jika halaman landscape, ubah orientasi sementara di PDF
+    if (isLandscape) {
+      pdf.addPage([pdfHeight, pdfWidth], 'landscape');
+    } else if (i > 0) {
+      pdf.addPage([pdfWidth, pdfHeight], 'portrait');
+    }
+
+    // Render halaman HTML menjadi Canvas (gambar)
+    const canvas = await html2canvas(page, {
+      scale: 2, // Resolusi tinggi
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      windowWidth: page.scrollWidth,
+      windowHeight: page.scrollHeight
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    
+    // Hitung rasio gambar agar lebar 100% sesuai kertas PDF
+    const imgProps = pdf.getImageProperties(imgData);
+    let imgWidth = isLandscape ? pdfHeight : pdfWidth;
+    let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    // Jika gambar lebih tinggi dari 1 halaman PDF, potong dan lanjutkan di halaman berikutnya
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= (isLandscape ? pdfWidth : pdfHeight);
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight; // Geser posisi gambar ke atas
+      if (!isLandscape) {
+        pdf.addPage([pdfWidth, pdfHeight], 'portrait');
+      } else {
+        pdf.addPage([pdfHeight, pdfWidth], 'landscape');
+      }
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= (isLandscape ? pdfWidth : pdfHeight);
+    }
+  }
+
+  // Simpan file PDF hasilnya
+  pdf.save(`Report_${state.report.id || 'Maintenance'}.pdf`);
+  toast('PDF berhasil diunduh!');
+}
 
 function loadSample(){
   state.report = { type:'Preventive Maintenance', id:'PM-2024-0142', projectName:'Maintenance Data Center Q4 2024', contractNo:'CTR/MII/2023/045', period:'Oktober 2024', date:new Date().toISOString().split('T')[0], startTime:'09:00', endTime:'12:30', engineer:'Ahmad Fauzi, S.T.', customer:'PT Bank Mandiri Tbk', location:'DC Production - Jakarta', priority:'High', objective:'', summary:'', notes:'', hardwareTypes: ['server', 'storage', 'san'] };
@@ -1040,18 +1140,25 @@ function loadSample(){
   Object.entries(fieldMap).forEach(([id,key])=>{ document.getElementById(id).value = state.report[key] || ''; });
   state.signatures = { prepName:'Ahmad Fauzi, S.T.', prepRole:'Field Engineer', revName:'Budi Santoso', revRole:'Service Manager', ackName:'Andi Wijaya', ackRole:'IT Infrastructure Manager' };
   ['prepName','prepRole','revName','revRole','ackName','ackRole'].forEach(k=>{ document.getElementById('f_'+k).value = state.signatures[k]; });
-  document.getElementById('equipmentList').innerHTML = ''; document.getElementById('equipmentEmpty').style.display = 'block';
+  document.getElementById('excelEquipmentList').innerHTML = ''; document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  document.getElementById('wordEquipmentList').innerHTML = ''; document.getElementById('wordEquipmentEmpty').style.display = 'block';
   
-  addEquipment('server');
-  state.equipment[0].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk server SRV-PROD-01:</p><img src="https://images.unsplash.com/photo-1545665277-9c5f6bd2d3e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo"><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 2"></div>`;
-  document.getElementById('wordtxt_eq_1').innerHTML = `<strong>doc_detail_server.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+  addEquipment('excel');
+  state.equipment[0].excelData = [["Hostname", "IP Address", "OS", "Status"], ["SRV-DB-01", "10.10.1.10", "RHEL 8", "Healthy"], ["SRV-APP-02", "10.10.1.11", "Win 2019", "Healthy"]];
+  state.equipment[0].excelName = "server_list.xlsx";
+  document.getElementById('exceltxt_eq_1').innerHTML = `<strong>server_list.xlsx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+  renderExcelPreview('eq_1');
+
+  addEquipment('word');
+  state.equipment[1].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk server SRV-PROD-01:</p><img src="https://images.unsplash.com/photo-1545665277-9c5f6bd2d3e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo"><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 2"></div>`;
+  state.equipment[1].wordName = "doc_detail_server.docx";
+  document.getElementById('wordtxt_eq_2').innerHTML = `<strong>doc_detail_server.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
 
   Object.keys(state.checklist).forEach(cat=>{ state.checklist[cat].forEach((item, idx)=>{ if(idx < 5) item.checked = true; if(idx === 2) item.remark = 'Berfungsi normal, suhu stabil di 45C'; }); });
   
   addFinding();
   updateFinding('find_1','type','issue'); updateFinding('find_1','equipment','SRV-PROD-DB01 / RAM Slot 2'); updateFinding('find_1','description','RAM slot 2 mengalami degradasi dan menunjukkan error multi-bit pada event log.'); updateFinding('find_1','action','Reseat RAM module pada slot 2 dan monitor untuk error selanjutnya.'); updateFinding('find_1','status','In Progress');
   
-  // Panggil updateHardwareSelection untuk update teks objective otomatis
   updateHardwareSelection();
   renderChecklists(); generateAutoSummary(); updateProgress(); toast('Sample data berhasil dimuat');
 }
@@ -1064,14 +1171,15 @@ function clearAll(){
   document.getElementById('hw_server').checked = true; document.getElementById('hw_storage').checked = true; document.getElementById('hw_san').checked = true;
   Object.entries(fieldMap).forEach(([id,key])=>{ document.getElementById(id).value = state.report[key] || ''; });
   ['prepName','prepRole','revName','revRole','ackName','ackRole'].forEach(k=>{ document.getElementById('f_'+k).value = ''; });
-  document.getElementById('equipmentList').innerHTML = ''; document.getElementById('equipmentEmpty').style.display = 'block';
+  document.getElementById('excelEquipmentList').innerHTML = ''; document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  document.getElementById('wordEquipmentList').innerHTML = ''; document.getElementById('wordEquipmentEmpty').style.display = 'block';
   document.getElementById('findingsList').innerHTML = ''; document.getElementById('findingsEmpty').style.display = 'block';
-  updateHardwareSelection(); // Update teks objective
+  updateHardwareSelection(); 
   renderChecklists(); generateAutoSummary(); updateProgress(); toast('Data berhasil direset');
 }
 
 // Init awal
-updateHardwareSelection(); // Set teks objective saat pertama kali load
+updateHardwareSelection(); 
 renderChecklists(); generateAutoSummary(); updateProgress();
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('f_reportDate').value = today;
