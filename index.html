@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --ink:#1a1a1a; --ink-2:#333333; --paper:#ffffff; --paper-warm:#f9f9f9; --paper-deep:#f2f2f2;
@@ -19,7 +18,7 @@
     --rose:#A8324E; --emerald:#15803D; --slate:#475569; --slate-light:#94A3B8; --border:#e2e8f0; --border-soft:#f1f5f9;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
+  html,body{margin:0;padding:0; width:100%; overflow-x:hidden;}
   body{
     font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     background:
@@ -36,17 +35,17 @@
   .brand-mark img{width:100%; height:100%; object-fit:contain; padding:4px}
   .brand-title{color:#fff; font-weight:700; font-size:15px; letter-spacing:-.01em}
   .brand-sub{color:var(--accent-soft); font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:500; margin-top:2px}
-  .toolbar-actions{display:flex; align-items:center; gap:10px}
+  .toolbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .tool-btn{ padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:all .2s; border:1px solid transparent; }
   .tool-btn-ghost{ color:#cbd5e1; background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.08); }
   .tool-btn-ghost:hover{background:rgba(255,255,255,.1); color:#fff}
   .tool-btn-primary{ background:linear-gradient(135deg,var(--accent) 0%, var(--accent-deep) 100%); color:#fff; box-shadow:0 6px 18px rgba(15,118,110,.4); }
   .tool-btn-primary:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(15,118,110,.55)}
   
-  .workspace{ max-width:1400px; margin:0 auto; padding:28px; display:grid; grid-template-columns:280px 1fr; gap:24px; }
+  .workspace{ max-width:1400px; margin:0 auto; padding:28px; display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:start; }
   @media (max-width:1024px){ .workspace{grid-template-columns:1fr; padding:18px} }
   
-  .sidebar{ position:sticky; top:90px; align-self:start; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:18px; backdrop-filter:blur(10px); max-height:calc(100vh - 110px); overflow-y:auto; }
+  .sidebar{ position:sticky; top:90px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:18px; backdrop-filter:blur(10px); max-height:calc(100vh - 110px); overflow-y:auto; }
   .sidebar h3{ color:#fff; font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; margin:0 0 12px 0; color:var(--accent-soft); }
   .nav-list{list-style:none; padding:0; margin:0 0 20px 0}
   .nav-list li{margin:2px 0}
@@ -61,8 +60,8 @@
   .progress-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-deep)); border-radius:99px; transition:width .4s ease; width:0%; }
   .sidebar-tip{ font-size:11px; color:#94a3b8; line-height:1.5; padding:10px 12px; background:rgba(255,255,255,.03); border-radius:8px; margin-top:14px; border-left:2px solid var(--accent); }
   
-  .editor{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:24px; backdrop-filter:blur(10px); }
-  .editor-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,.07); }
+  .editor{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:24px; backdrop-filter:blur(10px); min-width:0; }
+  .editor-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,.07); gap:16px; flex-wrap:wrap; }
   .editor-title{color:#fff; font-size:18px; font-weight:700; letter-spacing:-.01em}
   .editor-sub{color:#94a3b8; font-size:12px; margin-top:2px}
   .tabs{display:flex; gap:4px; flex-wrap:wrap}
@@ -76,7 +75,7 @@
   
   .field-group{margin-bottom:18px}
   .field-label{ display:flex; align-items:center; gap:8px; color:#e2e8f0; font-size:13px; font-weight:600; margin-bottom:8px; }
-  .field-label .req{color:var(--accent); font-size:14px}
+  .field-label . req{color:var(--accent); font-size:14px}
   .field-hint{color:#94a3b8; font-size:11px; font-weight:400; margin-left:auto}
   
   .input, .textarea, .select{ width:100%; padding:11px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:8px; color:#fff; font-size:13px; font-family:inherit; transition:all .2s; outline:none; }
@@ -140,33 +139,42 @@
   .findings-entry{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:14px; margin-bottom:10px; border-left:3px solid var(--rose); }
   .findings-entry.corrective{border-left-color:var(--emerald)}
   
-  .preview-modal{ position:fixed; inset:0; z-index:100; background:rgba(5,8,20,.92); backdrop-filter:blur(8px); display:none; overflow-y:auto; padding:30px 0; }
+  /* Preview Modal & Tombol Floating */
+  .preview-modal{ position:fixed; inset:0; z-index:100; background:rgba(5,8,20,.95); backdrop-filter:blur(8px); display:none; overflow-y:auto; padding:40px 20px; }
   .preview-modal.active{display:block}
-  .preview-toolbar{ position:sticky; top:0; z-index:5; background:rgba(10,14,39,.95); border-bottom:1px solid rgba(201,169,97,.2); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-  .preview-toolbar-title{color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; gap:10px}
-  .preview-toolbar-title i{color:var(--accent)}
   
-  .doc-container-preview { margin: 0 auto; background: #ffffff; }
+  .preview-toolbar { position: fixed; top: 20px; right: 20px; z-index: 110; display: flex; gap: 10px; }
   
-  /* PERBAIKAN: Padding dipindah ke sini agar bisa diwariskan ke html2canvas dengan rapi */
-  .page-wrapper { position: relative; background: #fff; margin: 0 auto 30px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 15mm 20mm; }
+  .doc-container-preview { margin: 0 auto; background: #ffffff; max-width: 100%; }
   
-  .page-portrait { width: 210mm; min-height: 297mm; }
-  .page-landscape { width: 297mm; min-height: 210mm; }
+  /* PERBAIKAN: Layout Kertas A4 Presisi Tinggi dengan Tinggi Mutlak */
+  .page-wrapper { 
+    position: relative; 
+    background: #fff; 
+    margin: 0 auto 15px auto; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    width: 210mm; 
+    max-width: 100%;
+    height: 297mm; 
+    padding: 15mm 20mm 25mm 20mm; 
+    box-sizing: border-box; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+  }
+  .page-landscape { width: 297mm; height: 210mm; }
   
-  .page-content { color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11pt; line-height: 1.6; }
+  .page-content { color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10pt; line-height: 1.5; width: 100%; flex-grow: 1; overflow-y: auto; }
   
-  /* PERBAIKAN: Padding kiri-kanan di-lock ke 20mm agar header sejajar dengan isi */
-  .doc-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:14px; margin-bottom:25px; border-bottom: 1px solid var(--border); font-size: 9pt; color: var(--slate); }
+  .doc-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; margin-bottom:20px; border-bottom: 1px solid var(--border); font-size: 8pt; color: var(--slate); flex-shrink: 0; }
   .doc-header-left { font-weight: 600; }
   .doc-header-right { font-weight: 700; color: var(--accent-deep); }
-  .doc-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; display: flex; justify-content: space-between; align-items: center; font-size: 9pt; color: var(--slate); border-top: 1px solid var(--border); padding-top: 8px; }
   
-  /* PERBAIKAN: Cover dan TOC tidak memerlukan padding karena dipindah ke page-wrapper */
-  .cover-page { display: flex; flex-direction: column; justify-content: space-between; min-height: 297mm; }
+  .doc-footer { position: absolute; bottom: 10mm; left: 20mm; right: 20mm; display: flex; justify-content: space-between; align-items: center; font-size: 8pt; color: var(--slate); border-top: 1px solid var(--border); padding-top: 5px; }
   
-  .cover-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; }
-  .cover-body { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 0; }
+  .cover-page { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
+  .cover-body { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 0; width: 100%; }
+  
   .cover-ornament { width: 80px; height: 4px; background: var(--accent); margin-bottom: 20px; }
   .cover-title { font-family: 'Source Serif 4', serif; font-size: 42pt; font-weight: 700; color: var(--ink); margin: 0 0 10px 0; line-height: 1.1; }
   .cover-subtitle { font-size: 14pt; color: var(--slate); margin-bottom: 50px; letter-spacing: 0.05em; }
@@ -181,17 +189,17 @@
   
   .toc-title { font-family: 'Source Serif 4', serif; font-size: 24pt; font-weight: 700; color: var(--ink); text-align: center; margin: 40px 0 30px 0; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
   .toc-list { list-style: none; padding: 0; margin: 0; }
-  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 12pt; }
+  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 11pt; }
   .toc-text { font-weight: 600; color: var(--ink); }
   .toc-page { font-family: 'JetBrains Mono', monospace; color: var(--accent-deep); font-weight: 700; }
   
-  .doc-section{margin-bottom:25px;}
-  .doc-section-title{ display:flex; align-items:center; gap:10px; font-size:12pt; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; padding-bottom:6px; border-bottom:2px solid var(--accent); }
-  .doc-section-title::before{ content:''; width:4px; height:16px; background:var(--accent); border-radius:2px; }
-  .doc-section-title .num{ font-family:'JetBrains Mono', monospace; color:var(--accent-deep); font-size:11pt; font-weight:700; }
+  .doc-section{margin-bottom:20px;}
+  .doc-section-title{ display:flex; align-items:center; gap:10px; font-size:11pt; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; padding-bottom:5px; border-bottom:2px solid var(--accent); }
+  .doc-section-title::before{ content:''; width:4px; height:14px; background:var(--accent); border-radius:2px; }
+  .doc-section-title .num{ font-family:'JetBrains Mono', monospace; color:var(--accent-deep); font-size:10pt; font-weight:700; }
   
-  .doc-paragraph { margin: 0 0 10px 0; }
-  .doc-paragraph strong { display: block; margin-bottom: 4px; font-size: 11pt; color: var(--ink); }
+  .doc-paragraph { margin: 0 0 10px 0; font-size: 10pt; }
+  .doc-paragraph strong { display: block; margin-bottom: 4px; font-size: 10pt; color: var(--ink); }
   .doc-paragraph-justify {
     text-align: justify; 
     text-justify: inter-word;
@@ -199,55 +207,55 @@
     border-left: 3px solid var(--paper-deep); 
     margin-top: 5px;
   }
-  .doc-paragraph-justify p {
-    margin: 0 0 8px 0;
-  }
+  .doc-paragraph-justify p { margin: 0 0 8px 0; }
   
   .info-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:0; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
-  .info-cell{ padding:12px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .info-cell{ padding:8px 10px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
   .info-cell:nth-child(4n){border-right:none}
   .info-cell:nth-last-child(-n+4){border-bottom:none}
-  .info-cell .label{ font-size:8pt; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:700; margin-bottom:4px; }
-  .info-cell .value{ font-size:10pt; font-weight:600; color:var(--ink); word-break:break-word; }
+  .info-cell .label{ font-size:7pt; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:700; margin-bottom:3px; }
+  .info-cell .value{ font-size:9pt; font-weight:600; color:var(--ink); word-break:break-word; }
   .info-cell .value.empty{color:var(--slate-light); font-style:italic; font-weight:400}
   
-  .doc-table, .checklist-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: 10pt; margin-bottom: 10px; table-layout: fixed; word-wrap: break-word; }
-  .doc-table th, .checklist-table th { background: var(--paper-deep); color: var(--ink); padding: 10px 12px; text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; border-bottom: 1px solid var(--border); word-wrap: break-word; vertical-align: top; }
-  .doc-table td, .checklist-table td { padding: 10px 12px; border-top: 1px solid var(--border-soft); vertical-align: top; word-wrap: break-word; white-space: normal; }
+  .doc-table, .checklist-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: 9pt; margin-bottom: 10px; table-layout: fixed; word-wrap: break-word; }
+  .doc-table th, .checklist-table th { background: var(--paper-deep); color: var(--ink); padding: 8px 10px; text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; border-bottom: 1px solid var(--border); word-wrap: break-word; vertical-align: top; }
+  .doc-table td, .checklist-table td { padding: 8px 10px; border-top: 1px solid var(--border-soft); vertical-align: top; word-wrap: break-word; white-space: normal; }
   .doc-table tr, .checklist-table tr { page-break-inside: avoid !important; }
   .doc-table tr:nth-child(even) td, .checklist-table tr:nth-child(even) td {background:var(--paper-warm)}
   .doc-table .center{text-align:center}
   
-  .excel-display-table { width: 100%; border-collapse: collapse; font-size: 9pt; background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word; }
-  .excel-display-table th { background: var(--paper-deep); padding: 8px 10px; text-align: left; border: 1px solid var(--border); font-weight: 700; font-size: 9pt; word-wrap: break-word; }
-  .excel-display-table td { padding: 6px 10px; border: 1px solid var(--border-soft); font-size: 9pt; word-wrap: break-word; white-space: normal; }
+  .excel-display-table { width: 100%; border-collapse: collapse; font-size: 8pt; background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word; }
+  .excel-display-table th { background: var(--paper-deep); padding: 6px 8px; text-align: left; border: 1px solid var(--border); font-weight: 700; font-size: 8pt; word-wrap: break-word; }
+  .excel-display-table td { padding: 4px 8px; border: 1px solid var(--border-soft); font-size: 8pt; word-wrap: break-word; white-space: normal; }
   .excel-display-table tr { page-break-inside: avoid !important; }
   
-  .word-content-display { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; padding: 15px; page-break-inside: avoid; }
-  .word-doc-view p { margin: 0 0 10px 0; line-height: 1.5; }
-  .word-doc-view img { max-width: 100% !important; height: auto !important; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border); page-break-inside: avoid; }
+  .word-content-display { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; padding: 15px; }
+  .word-doc-view p { margin: 0 0 10px 0; line-height: 1.5; page-break-inside: avoid; }
+  .word-doc-view img { max-width: 100% !important; height: auto !important; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border); page-break-inside: avoid !important; }
   
-  .findings-card{ border:1px solid var(--border); border-radius:6px; background:#fff; padding:15px; margin-bottom:12px; border-left:4px solid var(--rose); page-break-inside: avoid; }
+  .findings-card{ border:1px solid var(--border); border-radius:6px; background:#fff; padding:15px; margin-bottom:12px; border-left:4px solid var(--rose); page-break-inside: avoid !important; }
   .findings-card.corrective{border-left-color:var(--emerald)}
   .findings-card-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px; }
-  .findings-card-title{font-weight:700; color:var(--ink); font-size:11pt}
-  .findings-card-meta{font-size:9pt; color:var(--slate); margin-top:2px}
-  .findings-card-body{font-size:10pt; color:var(--ink-2); line-height:1.5; margin-top:8px}
+  .findings-card-title{font-weight:700; color:var(--ink); font-size:10pt}
+  .findings-card-meta{font-size:8pt; color:var(--slate); margin-top:2px}
+  .findings-card-body{font-size:9pt; color:var(--ink-2); line-height:1.5; margin-top:8px}
   .findings-card-body strong{color:var(--ink); display:block; margin-bottom:4px;}
   
-  .doc-images{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; page-break-inside: avoid; }
+  .doc-images{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; page-break-inside: avoid !important; }
   .doc-image{ border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
   .doc-image img{ width:100%; aspect-ratio:4/3; object-fit:cover; display:block; }
-  .doc-image .caption{ padding:6px 8px; font-size:8pt; color:var(--slate); border-top:1px solid var(--border-soft); background:var(--paper-warm); text-align: center; }
+  .doc-image .caption{ padding:5px 8px; font-size:7pt; color:var(--slate); border-top:1px solid var(--border-soft); background:var(--paper-warm); text-align: center; }
   
-  .sign-block{ display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:40px; page-break-inside: avoid; }
-  .sign-box{text-align:center;}
-  .sign-label{ font-size:9pt; letter-spacing:.1em; text-transform:uppercase; color:var(--slate); font-weight:700; margin-bottom:60px; }
-  .sign-line{ border-top:1px solid var(--ink); padding-top:8px; font-size:10pt; }
-  .sign-name{font-weight:700; color:var(--ink)}
-  .sign-role{color:var(--slate); font-size:9pt; margin-top:2px}
+  /* PERBAIKAN: Tabel Tanda Tangan Standar Korporat */
+  .sign-table { width: 100%; border-collapse: collapse; margin-top: 40px; table-layout: fixed; page-break-inside: avoid !important; }
+  .sign-table th { border: 1px solid var(--border); background: var(--paper-deep); padding: 8px; text-align: center; font-size: 9pt; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .sign-table td { border: 1px solid var(--border); padding: 10px; text-align: center; vertical-align: bottom; }
+  .sign-table .sign-space { height: 20mm; } 
+  .sign-name { font-weight: 700; font-size: 10pt; margin-bottom: 2px; }
+  .sign-role { font-size: 8pt; color: var(--slate); margin-bottom: 5px; text-transform: uppercase; }
+  .sign-date { font-size: 8pt; color: var(--slate); margin-top: 5px; }
   
-  .empty-state{ text-align:center; padding:20px; color:var(--slate-light); font-style:italic; font-size:10pt; }
+  .empty-state{ text-align:center; padding:20px; color:var(--slate-light); font-style:italic; font-size:9pt; }
   
   ::-webkit-scrollbar{width:8px; height:8px}
   ::-webkit-scrollbar-track{background:transparent}
@@ -257,6 +265,48 @@
   .toast{ position:fixed; bottom:24px; right:24px; padding:14px 20px; background:linear-gradient(135deg,var(--ink),var(--ink-2)); color:#fff; border-radius:10px; border-left:3px solid var(--accent); box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:200; transform:translateY(100px); opacity:0; transition:all .3s; font-size:13px; font-weight:500; display:flex; align-items:center; gap:10px; }
   .toast.show{transform:translateY(0); opacity:1}
   .toast i{color:var(--accent)}
+  
+  /* PERBAIKAN: CSS Print Presisi A4 Absolut */
+  @media print {
+    body { background: #fff; margin: 0; padding: 0; }
+    body * { visibility: hidden; }
+    #previewModal, #previewModal * { visibility: visible; }
+    #previewModal { position: absolute; left: 0; top: 0; width: 100%; height: auto; background: #fff; padding: 0; overflow: visible; display: block !important; }
+    .doc-container-preview { margin: 0; padding: 0; box-shadow: none; width: 100%; }
+    .preview-toolbar { display: none !important; }
+    
+    .page-wrapper { 
+      width: 210mm; 
+      min-height: 297mm;
+      height: auto !important; 
+      margin: 0; 
+      box-shadow: none; 
+      page-break-after: always; 
+      break-after: page; 
+      padding: 15mm 20mm 25mm 20mm; 
+      overflow: visible !important; 
+      display: block;
+    }
+    .page-landscape { width: 297mm; min-height: 210mm; }
+    .page-content { overflow: visible !important; height: auto !important; }
+    
+    @page { 
+      size: A4; 
+      margin: 0; 
+    }
+  }
+
+  /* CSS khusus untuk mode ekspor PDF agar html2canvas membaca tinggi halaman dengan benar */
+  body.exporting-pdf .page-wrapper {
+      height: auto !important;
+      min-height: 297mm !important;
+      overflow: visible !important;
+      display: block !important;
+  }
+  body.exporting-pdf .page-content {
+      overflow: visible !important;
+      height: auto !important;
+  }
 </style>
 </head>
 <body>
@@ -265,7 +315,7 @@
   <div class="topbar-inner">
     <div class="brand">
       <div class="brand-mark">
-        <img src="https://z-cdn-media.chatglm.cn/files/0a5b250c-30d6-4f48-9b93-0068d0dbe63d.png?auth_key=1887235523-3cbd4caeda3f42098a81ed8460a0247c-0-1de642983adf9f733a255b7979c3fd15" alt="MII Logo">
+        <img id="brandLogo" src="https://z-cdn-media.chatglm.cn/files/9e464fed-d53c-4018-8821-381594956896.png?auth_key=1888009769-d8623d6ed85e4ee6ae5e44f0d233816b-0-4203c8cd4a4f1ef0dbe2b091599460b6" alt="MII Logo" crossorigin="anonymous">
       </div>
       <div>
         <div class="brand-title">HSS2 - PT. Mitra Integrasi Informatika</div>
@@ -297,7 +347,9 @@
     </div>
     <div class="sidebar-tip">
       <i class="fas fa-lightbulb" style="color:var(--accent)"></i> 
-      Tip: Isi semua bagian untuk mendapatkan laporan yang lengkap. Gunakan tombol <strong>Generate Report</strong> untuk melihat hasil &amp; mencetak PDF.
+      Tip: Isi semua bagian untuk mendapatkan laporan yang lengkap. Gunakan tombol <strong>Generate Report</strong> untuk melihat hasil laporan.<br><br>
+      <i class="fas fa-print" style="color:var(--accent)"></i>
+      <strong>Tips Print:</strong> Saat dialog Print terbuka (Ctrl+P), pastikan opsi <strong>"Headers and footers"</strong> di-nonaktifkan (unchecked) agar nomor halaman tidak ganda.
     </div>
   </aside>
   
@@ -435,7 +487,7 @@
     </section>
     
     <section class="form-section" id="sec-checklist">
-      <p style="color:#cbd5e1; font-size:13px; margin:0 0 14px 0">Centang item yang sesuai dan tambahkan keterangan bila perlu. <strong style="color:#fca5b8">Catatan: Item yang tidak dicentang tidak akan ditampilkan di laporan PDF.</strong></p>
+      <p style="color:#cbd5e1; font-size:13px; margin:0 0 14px 0">Centang item yang sesuai dan tambahkan keterangan bila perlu. <strong style="color:#fca5b8">Catatan: Item yang tidak dicentang tidak akan ditampilkan di laporan.</strong></p>
       <div id="checklistContainer"></div>
     </section>
     
@@ -488,11 +540,7 @@
 
 <div class="preview-modal" id="previewModal">
   <div class="preview-toolbar no-print">
-    <div class="preview-toolbar-title"><i class="fas fa-file-alt"></i> Document Preview</div>
-    <div style="display:flex; gap:8px">
-      <button class="tool-btn tool-btn-ghost" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
-      <button class="tool-btn tool-btn-primary" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
-    </div>
+    <button class="tool-btn tool-btn-primary" onclick="window.print()"><i class="fas fa-file-pdf"></i> Save as PDF</button>
   </div>
   <div class="doc-container-preview" id="docContainer"></div>
 </div>
@@ -500,7 +548,32 @@
 <div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Saved</span></div>
 
 <script>
-const LOGO_URL = "https://z-cdn-media.chatglm.cn/files/0a5b250c-30d6-4f48-9b93-0068d0dbe63d.png?auth_key=1887235523-3cbd4caeda3f42098a81ed8460a0247c-0-1de642983adf9f733a255b7979c3fd15";
+let LOGO_URL = "https://z-cdn-media.chatglm.cn/files/9e464fed-d53c-4018-8821-381594956896.png?auth_key=1888009769-d8623d6ed85e4ee6ae5e44f0d233816b-0-4203c8cd4a4f1ef0dbe2b091599460b6";
+
+function convertLogoToBase64(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.height = img.naturalHeight;
+      canvas.width = img.naturalWidth;
+      ctx.drawImage(img, 0, 0);
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        LOGO_URL = dataUrl;
+        document.getElementById('brandLogo').src = dataUrl;
+        resolve(dataUrl);
+      } catch (e) {
+        resolve(url);
+      }
+    };
+    img.onerror = function() { resolve(url); };
+    img.src = url;
+  });
+}
+convertLogoToBase64(LOGO_URL);
 
 const state = {
   report: {
@@ -876,10 +949,20 @@ function updateProgress(){
 }
 
 function openPreview(){ generateAutoSummary(); generateDocument(); document.getElementById('previewModal').classList.add('active'); document.body.style.overflow = 'hidden'; document.getElementById('previewModal').scrollTop = 0; }
-function closePreview(){ document.getElementById('previewModal').classList.remove('active'); document.body.style.overflow = ''; }
+
+function closePreview(e){ 
+  if (e.target.id === 'previewModal' || e.keyCode === 27) {
+    document.getElementById('previewModal').classList.remove('active'); 
+    document.body.style.overflow = ''; 
+  }
+}
+document.getElementById('previewModal').addEventListener('click', closePreview);
+document.addEventListener('keydown', closePreview);
+
 function fmtDate(d){ if(!d) return '—'; const dt = new Date(d); const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return dt.getDate()+' '+months[dt.getMonth()]+' '+dt.getFullYear(); }
 
-function createPageWrapper(orientation, pageNumber, isFrontMatter = false) {
+// PERBAIKAN: Fungsi pembuat halaman dengan footer otomatis
+function createPageWrapper(orientation, pageNumber, totalPages) {
   const page = document.createElement('div');
   page.className = `page-wrapper page-${orientation}`;
   
@@ -890,17 +973,14 @@ function createPageWrapper(orientation, pageNumber, isFrontMatter = false) {
     </div>
   `;
   
-  let docFooter = '';
-  if (!isFrontMatter) {
-    docFooter = `
-      <div class="doc-footer">
-        <div>Report ID: ${escapeHtml(state.report.id) || 'N/A'}</div>
-        <div>Page ${pageNumber}</div>
-      </div>
-    `;
-  }
+  const docFooter = `
+    <div class="doc-footer">
+      <div>Report ID: ${escapeHtml(state.report.id) || 'N/A'}</div>
+      <div>Page ${pageNumber} of ${totalPages}</div>
+    </div>
+  `;
   
-  page.innerHTML = `${docHeader}<div class="page-content" id="pageContent_${pageNumber}"></div>${docFooter}`;
+  page.innerHTML = `${docHeader}<div class="page-content"></div>${docFooter}`;
   return page;
 }
 
@@ -915,19 +995,105 @@ function formatJustifiedParagraph(text) {
   }).join('');
 }
 
+// PERBAIKAN: Fungsi untuk memecah konten Word menjadi beberapa halaman berdasarkan gambar
+function splitWordContentByImages(htmlContent) {
+  const div = document.createElement('div');
+  div.innerHTML = htmlContent;
+  
+  const images = Array.from(div.querySelectorAll('img'));
+  if (images.length <= 1) {
+    // Jika hanya 1 atau tidak ada gambar, kembalikan apa adanya dalam 1 halaman
+    return [htmlContent];
+  }
+  
+  const pages = [];
+  images.forEach((img) => {
+    const pageDiv = document.createElement('div');
+    pageDiv.className = 'word-content-display';
+    
+    // Ambil paragraf sebelum gambar jika ada
+    let prev = img.previousElementSibling;
+    while (prev && prev.tagName !== 'P' && prev.tagName !== 'DIV') {
+      prev = prev.previousElementSibling;
+    }
+    
+    if (prev && prev.tagName === 'P') {
+      pageDiv.appendChild(prev.cloneNode(true));
+    }
+    
+    // Masukkan gambar
+    const imgClone = img.cloneNode(true);
+    imgClone.style.maxHeight = '220mm'; // Batasi tinggi gambar agar 1 gambar 1 halaman
+    imgClone.style.width = 'auto';
+    imgClone.style.display = 'block';
+    imgClone.style.margin = '0 auto';
+    pageDiv.appendChild(imgClone);
+    
+    pages.push(pageDiv.outerHTML);
+  });
+  
+  return pages;
+}
+
 function generateDocument(){
   const r = state.report;
   const coverSubtitle = 'Infrastruktur ' + getSelectedHardwareText();
   
   const container = document.getElementById('docContainer');
   container.innerHTML = ''; 
-  let currentPageNum = 1;
+  
+  const excelFiles = state.equipment.filter(e => e.fileType === 'excel' && e.excelData);
+  const wordFiles = state.equipment.filter(e => e.fileType === 'word' && e.wordContent);
 
-  // 1. Cover
+  // PERBAIKAN: Pra-hitung halaman untuk Word yang dipotong per gambar
+  let wordPageCount = 0;
+  let wordFilePages = []; // Menyimpan array dari array of pages
+
+  if (wordFiles.length > 0) {
+    wordFiles.forEach(e => {
+      const pages = splitWordContentByImages(e.wordContent);
+      wordFilePages.push(pages);
+      wordPageCount += pages.length;
+    });
+  }
+
+  // 1. Hitung Total Halaman & Daftar Isi Dinamis
+  let currentPage = 1;
+  let tocNum = 1;
+  let tocItems = [];
+  
+  tocItems.push({ num: tocNum++, text: 'Report Information', pageNum: currentPage });
+  if (r.objective || r.summary) {
+      tocItems.push({ num: tocNum++, text: 'Description & Summary', pageNum: currentPage });
+  }
+  if (excelFiles.length > 0) {
+      currentPage++;
+      tocItems.push({ num: tocNum++, text: 'Equipment List (Excel)', pageNum: currentPage });
+  }
+  if (wordFiles.length > 0) {
+      currentPage++;
+      tocItems.push({ num: tocNum++, text: 'Equipment Details (Word)', pageNum: currentPage });
+      currentPage += (wordPageCount - 1); // Tambahkan halaman berdasarkan total pecahan gambar
+  }
+  currentPage++;
+  tocItems.push({ num: tocNum++, text: 'Maintenance Checklist', pageNum: currentPage });
+  
+  currentPage++;
+  tocItems.push({ num: tocNum++, text: 'Findings & Corrective Actions', pageNum: currentPage });
+  
+  if (r.notes) {
+      currentPage++;
+      tocItems.push({ num: tocNum++, text: 'Notes & Recommendations', pageNum: currentPage });
+  }
+  currentPage++;
+  tocItems.push({ num: tocNum++, text: 'Acknowledgment', pageNum: currentPage });
+  
+  const totalPages = currentPage;
+
+  // 2. Halaman Cover 
   const coverPage = document.createElement('div');
-  coverPage.className = 'page-wrapper page-portrait cover-page';
+  coverPage.className = 'page-wrapper cover-page';
   coverPage.innerHTML = `
-    <div class="cover-header"></div>
     <div class="cover-body">
       <div class="cover-ornament"></div>
       <h1 class="cover-title">Laporan<br>${r.type || 'Maintenance'}</h1>
@@ -943,28 +1109,20 @@ function generateDocument(){
   `;
   container.appendChild(coverPage);
 
-  // 2. Daftar Isi
+  // 3. Halaman Daftar Isi
   const tocPage = document.createElement('div');
-  tocPage.className = 'page-wrapper page-portrait';
-  let tocHtml = `<div class="page-content"><div class="toc-title">Daftar Isi</div><ul class="toc-list"><li class="toc-item"><span class="toc-text">1. Report Information</span><span class="toc-page">1</span></li>`;
-  if (r.objective || r.summary) tocHtml += `<li class="toc-item"><span class="toc-text">2. Description & Summary</span><span class="toc-page">1</span></li>`;
-  
-  const excelFiles = state.equipment.filter(e => e.fileType === 'excel' && e.excelData);
-  const wordFiles = state.equipment.filter(e => e.fileType === 'word' && e.wordContent);
-  
-  let nextPage = 2;
-  if (excelFiles.length > 0) { tocHtml += `<li class="toc-item"><span class="toc-text">3. Equipment List (Excel)</span><span class="toc-page">${nextPage}</span></li>`; nextPage++; }
-  if (wordFiles.length > 0) { tocHtml += `<li class="toc-item"><span class="toc-text">4. Equipment Details (Word)</span><span class="toc-page">${nextPage}</span></li>`; nextPage++; }
-  
-  tocHtml += `<li class="toc-item"><span class="toc-text">5. Maintenance Checklist</span><span class="toc-page">${nextPage}</span></li>`;
-  tocHtml += `<li class="toc-item"><span class="toc-text">6. Findings & Corrective Actions</span><span class="toc-page">${nextPage}</span></li>`;
-  if (r.notes) tocHtml += `<li class="toc-item"><span class="toc-text">7. Notes & Recommendations</span><span class="toc-page">${nextPage}</span></li>`;
-  tocHtml += `<li class="toc-item"><span class="toc-text">${r.notes ? '8' : '7'}. Acknowledgment</span><span class="toc-page">${nextPage}</span></li></ul></div>`;
+  tocPage.className = 'page-wrapper';
+  let tocHtml = `<div class="page-content"><div class="toc-title">Daftar Isi</div><ul class="toc-list">`;
+  tocItems.forEach(item => {
+      tocHtml += `<li class="toc-item"><span class="toc-text">${item.num}. ${item.text}</span><span class="toc-page">${item.pageNum}</span></li>`;
+  });
+  tocHtml += `</ul></div>`;
   tocPage.innerHTML = tocHtml;
   container.appendChild(tocPage);
 
-  // 3. Halaman Utama
-  const mainPage = createPageWrapper('portrait', currentPageNum);
+  // 4. Halaman Utama
+  let pageTracker = 1;
+  const mainPage = createPageWrapper('portrait', pageTracker, totalPages);
   let mainContent = `
     <div class="doc-section">
       <div class="doc-section-title"><span class="num">01</span> Report Information</div>
@@ -988,11 +1146,11 @@ function generateDocument(){
   `;
   mainPage.querySelector('.page-content').innerHTML = mainContent;
   container.appendChild(mainPage);
-  currentPageNum++;
+  pageTracker++;
 
-  // 4. Halaman Excel
+  // 5. Halaman Excel
   if(excelFiles.length > 0) {
-    const excelPage = createPageWrapper('landscape', currentPageNum);
+    const excelPage = createPageWrapper('landscape', pageTracker, totalPages);
     let excelContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">03</span> Equipment List (Excel)</div>`;
     
     excelFiles.forEach((e, idx) => {
@@ -1009,26 +1167,25 @@ function generateDocument(){
     excelContent += `</div>`;
     excelPage.querySelector('.page-content').innerHTML = excelContent;
     container.appendChild(excelPage);
-    currentPageNum++;
+    pageTracker++;
   }
 
-  // 5. Halaman Word
+  // 6. Halaman Word (Multi-Page: 1 gambar per halaman)
   if(wordFiles.length > 0) {
-    const wordPage = createPageWrapper('portrait', currentPageNum);
-    let wordHtmlContainer = `<div class="doc-section"><div class="doc-section-title"><span class="num">04</span> Equipment Details & Photos (Word)</div>`;
-    
-    wordFiles.forEach((e, idx) => {
-      let wordHtml = e.wordContent ? `<div class="word-content-display"><div class="word-doc-view">${e.wordContent}</div></div>` : '';
-      wordHtmlContainer += `<div style="margin-bottom:14px; padding:12px; background:#fff; border-radius:6px; border:1px solid var(--border-soft);"><div>${wordHtml}</div></div>`;
+    wordFilePages.forEach((pagesArray, fileIdx) => {
+      pagesArray.forEach((pageHtml, pageIdx) => {
+        const wordPage = createPageWrapper('portrait', pageTracker, totalPages);
+        // Hanya tampilkan judul section di halaman pertama dari file tersebut
+        let titleHtml = (fileIdx === 0 && pageIdx === 0) ? `<div class="doc-section-title"><span class="num">04</span> Equipment Details & Photos (Word)</div>` : '';
+        let wordContent = `<div class="doc-section">${titleHtml}${pageHtml}</div>`;
+        wordPage.querySelector('.page-content').innerHTML = wordContent;
+        container.appendChild(wordPage);
+        pageTracker++;
+      });
     });
-    
-    wordHtmlContainer += `</div>`;
-    wordPage.querySelector('.page-content').innerHTML = wordHtmlContainer;
-    container.appendChild(wordPage);
-    currentPageNum++;
   }
 
-  // 6. Halaman Checklist
+  // 7. Halaman Checklist
   const checkedItems = [];
   Object.entries(CHECKLIST_DEFS).forEach(([key, def])=>{
     if(r.hardwareTypes && r.hardwareTypes.includes(key)) {
@@ -1037,101 +1194,68 @@ function generateDocument(){
       }
     }
   });
-  const checkPage = createPageWrapper('portrait', currentPageNum);
+  const checkPage = createPageWrapper('portrait', pageTracker, totalPages);
   let checkContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">05</span> Maintenance Checklist (Verified)</div>${checkedItems.length === 0 ? '<div class="empty-state">No checklist items verified</div>' : `<table class="checklist-table"><thead><tr><th style="width:40px; text-align:center;">No.</th><th style="width:120px">Category</th><th>Check Item</th><th style="width:35%">Remarks</th></tr></thead><tbody>${checkedItems.map((c, i)=>`<tr><td style="text-align:center; vertical-align:top;">${i+1}</td><td style="vertical-align:top;"><span style="font-size:8pt;font-weight:600;color:var(--slate)">${c.category.replace(' Checklist','')}</span></td><td style="vertical-align:top;">${c.item}</td><td style="vertical-align:top;">${c.remark ? escapeHtml(c.remark) : '<span style="color:var(--slate-light)">—</span>'}</td></tr>`).join('')}</tbody></table>`}</div>`;
   checkPage.querySelector('.page-content').innerHTML = checkContent;
   container.appendChild(checkPage);
-  currentPageNum++;
+  pageTracker++;
 
-  // 7. Halaman Findings
-  const findPage = createPageWrapper('portrait', currentPageNum);
-  let findContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">06</span> Findings &amp; Corrective Actions</div>${state.findings.length === 0 ? '<div class="empty-state">No findings recorded</div>' : state.findings.map(f=>{ const typeLabel = {issue:'Issue', corrective:'Corrective Action', recommendation:'Recommendation'}[f.type] || 'Finding'; return `<div class="findings-card ${f.type==='corrective'?'corrective':''}"><div class="findings-card-head"><div><div class="findings-card-title">${escapeHtml(f.equipment) || typeLabel}</div><div class="findings-card-meta">${typeLabel} · Status: <strong>${f.status}</strong></div></div><span class="status-badge ${f.status==='Resolved'?'status-ok':f.status==='Pending'?'status-fail':'status-issue'}">${f.status}</span></div>${f.description ? `<div class="findings-card-body"><strong>Description:</strong> ${escapeHtml(f.description)}</div>` : ''}${f.rootCause ? `<div class="findings-card-body"><strong>Root Cause:</strong> ${escapeHtml(f.rootCause)}</div>` : ''}${f.action ? `<div class="findings-card-body"><strong>Action Taken:</strong> ${escapeHtml(f.action)}</div>` : ''}${f.images.length ? `<div class="doc-images" style="margin-top:8px">${f.images.map(img=>`<div class="doc-image"><img src="${img.data}" alt="${img.name}"><div class="caption">${escapeHtml(img.name)}</div></div>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`;
+  // 8. Halaman Findings
+  const findPage = createPageWrapper('portrait', pageTracker, totalPages);
+  let findContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">06</span> Findings &amp; Corrective Actions</div>${state.findings.length === 0 ? '<div class="empty-state">No findings recorded</div>' : state.findings.map(f=>{ const typeLabel = {issue:'Issue', corrective:'Corrective Action', recommendation:'Recommendation'}[f.type] || 'Finding'; return `<div class="findings-card ${f.type==='corrective'?'corrective':''}"><div class="findings-card-head"><div><div class="findings-card-title">${escapeHtml(f.equipment) || typeLabel}</div><div class="findings-card-meta">${typeLabel} · Status: <strong>${f.status}</strong>}</div></div><span class="status-badge ${f.status==='Resolved'?'status-ok':f.status==='Pending'?'status-fail':'status-issue'}">${f.status}</span></div>${f.description ? `<div class="findings-card-body"><strong>Description:</strong> ${escapeHtml(f.description)}</div>` : ''}${f.rootCause ? `<div class="findings-card-body"><strong>Root Cause:</strong> ${escapeHtml(f.rootCause)}</div>` : ''}${f.action ? `<div class="findings-card-body"><strong>Action Taken:</strong> ${escapeHtml(f.action)}</div>` : ''}${f.images.length ? `<div class="doc-images" style="margin-top:8px">${f.images.map(img=>`<div class="doc-image"><img src="${img.data}" alt="${img.name}"><div class="caption">${escapeHtml(img.name)}</div></div>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`;
   findPage.querySelector('.page-content').innerHTML = findContent;
   container.appendChild(findPage);
-  currentPageNum++;
+  pageTracker++;
 
-  // 8. Halaman Notes & Signatures
-  const signPage = createPageWrapper('portrait', currentPageNum);
+  // 9. Halaman Notes & Acknowledgment
+  const signPage = createPageWrapper('portrait', pageTracker, totalPages);
   const notesContent = state.report.notes ? formatJustifiedParagraph(state.report.notes) : '';
   
-  let signContent = `${state.report.notes ? `<div class="doc-section"><div class="doc-section-title"><span class="num">07</span> Notes &amp; Recommendations</div><div style="padding:15px; background:var(--paper-warm); border-radius:6px; border-left:3px solid var(--accent)">${notesContent}</div></div>` : ''}<div class="doc-section"><div class="doc-section-title"><span class="num">${state.report.notes?'08':'07'}</span> Acknowledgment</div><div class="sign-block"><div class="sign-box"><div class="sign-label">Prepared By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.prepName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.prepRole) || 'Field Engineer'}</div></div></div><div class="sign-box"><div class="sign-label">Reviewed By</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.revName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.revRole) || 'Service Manager'}</div></div></div></div><div class="sign-block" style="margin-top:20px"><div class="sign-box"><div class="sign-label">Acknowledged By (Customer)</div><div class="sign-line"><div class="sign-name">${escapeHtml(state.signatures.ackName) || '............................'}</div><div class="sign-role">${escapeHtml(state.signatures.ackRole) || 'Customer Representative'}</div></div></div><div class="sign-box"><div class="sign-label">Date</div><div class="sign-line"><div class="sign-name">${fmtDate(r.date)}</div><div class="sign-role">Signature Date</div></div></div></div></div>`;
+  let signContent = `
+    ${state.report.notes ? `<div class="doc-section"><div class="doc-section-title"><span class="num">07</span> Notes &amp; Recommendations</div><div style="padding:15px; background:var(--paper-warm); border-radius:6px; border-left:3px solid var(--accent)">${notesContent}</div></div>` : ''}
+    <div class="doc-section">
+      <div class="doc-section-title"><span class="num">${state.report.notes?'08':'07'}</span> Acknowledgment</div>
+      <table class="sign-table">
+        <thead>
+          <tr>
+            <th>Prepared By</th>
+            <th>Reviewed By</th>
+            <th>Acknowledged By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sign-space"></td>
+            <td class="sign-space"></td>
+            <td class="sign-space"></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.prepName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.prepRole) || 'Field Engineer'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.revName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.revRole) || 'Service Manager'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.ackName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.ackRole) || 'Customer Representative'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+  
   signPage.querySelector('.page-content').innerHTML = signContent;
   container.appendChild(signPage);
 }
 
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function toast(msg){ document.getElementById('toastMsg').textContent = msg; const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 2400); }
-
-// PERBAIKAN UTAMA PDF: Menggunakan metode slicing canvas agar tidak ada konten/teks yang terpotong acak
-async function exportToPDF() {
-  toast('Generating PDF, mungkin butuh beberapa saat...');
-  
-  const { jsPDF } = window.jspdf;
-  const pages = document.querySelectorAll('#docContainer .page-wrapper');
-  
-  if (pages.length === 0) return;
-
-  // Buat dokumen PDF A4 tanpa margin default dari jsPDF
-  const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-  });
-
-  const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
-  const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
-
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i];
-    const isLandscape = page.classList.contains('page-landscape');
-    
-    // Jika halaman landscape, ubah orientasi sementara di PDF
-    if (isLandscape) {
-      pdf.addPage([pdfHeight, pdfWidth], 'landscape');
-    } else if (i > 0) {
-      pdf.addPage([pdfWidth, pdfHeight], 'portrait');
-    }
-
-    // Render halaman HTML menjadi Canvas (gambar)
-    const canvas = await html2canvas(page, {
-      scale: 2, // Resolusi tinggi
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      windowWidth: page.scrollWidth,
-      windowHeight: page.scrollHeight
-    });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    
-    // Hitung rasio gambar agar lebar 100% sesuai kertas PDF
-    const imgProps = pdf.getImageProperties(imgData);
-    let imgWidth = isLandscape ? pdfHeight : pdfWidth;
-    let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-    // Jika gambar lebih tinggi dari 1 halaman PDF, potong dan lanjutkan di halaman berikutnya
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= (isLandscape ? pdfWidth : pdfHeight);
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight; // Geser posisi gambar ke atas
-      if (!isLandscape) {
-        pdf.addPage([pdfWidth, pdfHeight], 'portrait');
-      } else {
-        pdf.addPage([pdfHeight, pdfWidth], 'landscape');
-      }
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= (isLandscape ? pdfWidth : pdfHeight);
-    }
-  }
-
-  // Simpan file PDF hasilnya
-  pdf.save(`Report_${state.report.id || 'Maintenance'}.pdf`);
-  toast('PDF berhasil diunduh!');
-}
 
 function loadSample(){
   state.report = { type:'Preventive Maintenance', id:'PM-2024-0142', projectName:'Maintenance Data Center Q4 2024', contractNo:'CTR/MII/2023/045', period:'Oktober 2024', date:new Date().toISOString().split('T')[0], startTime:'09:00', endTime:'12:30', engineer:'Ahmad Fauzi, S.T.', customer:'PT Bank Mandiri Tbk', location:'DC Production - Jakarta', priority:'High', objective:'', summary:'', notes:'', hardwareTypes: ['server', 'storage', 'san'] };
@@ -1149,10 +1273,17 @@ function loadSample(){
   document.getElementById('exceltxt_eq_1').innerHTML = `<strong>server_list.xlsx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
   renderExcelPreview('eq_1');
 
+  // Sample Word 1: 2 Gambar (Akan membuat 2 halaman terpisah)
   addEquipment('word');
-  state.equipment[1].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk server SRV-PROD-01:</p><img src="https://images.unsplash.com/photo-1545665277-9c5f6bd2d3e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo"><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 2"></div>`;
+  state.equipment[1].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk server SRV-PROD-01:</p><img src="https://images.unsplash.com/photo-1545665277-9c5f6bd2d3e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 1"><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 2"></div>`;
   state.equipment[1].wordName = "doc_detail_server.docx";
   document.getElementById('wordtxt_eq_2').innerHTML = `<strong>doc_detail_server.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+  
+  // Sample Word 2: 1 Gambar (Akan membuat 1 halaman)
+  addEquipment('word');
+  state.equipment[2].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk storage array:</p><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Storage Photo"></div>`;
+  state.equipment[2].wordName = "doc_detail_storage.docx";
+  document.getElementById('wordtxt_eq_3').innerHTML = `<strong>doc_detail_storage.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
 
   Object.keys(state.checklist).forEach(cat=>{ state.checklist[cat].forEach((item, idx)=>{ if(idx < 5) item.checked = true; if(idx === 2) item.remark = 'Berfungsi normal, suhu stabil di 45C'; }); });
   
