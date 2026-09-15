@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Report HSS2 - PT. Mitra Integrasi Informatika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<!-- Library Export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#333333; --paper:#ffffff; --paper-warm:#f9f9f9; --paper-deep:#f2f2f2;
+    --accent:#0F766E; --accent-deep:#0B5D56; --accent-soft:#ccfbf1; --teal:#0F766E; --teal-deep:#0B5D56;
+    --rose:#A8324E; --emerald:#15803D; --slate:#475569; --slate-light:#94A3B8; --border:#e2e8f0; --border-soft:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0; width:100%; overflow-x:hidden;}
+  body{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 800px at 10% -10%, rgba(15,118,110,.07), transparent 60%),
+      radial-gradient(900px 700px at 110% 10%, rgba(201,169,97,.09), transparent 60%),
+      linear-gradient(180deg,#0A0E27 0%, #0E1530 100%);
+    background-attachment:fixed; color:var(--ink); min-height:100vh;
+  }
+  
+  .topbar{ position:sticky; top:0; z-index:50; backdrop-filter:blur(20px); background:rgba(10,14,39,.75); border-bottom:1px solid rgba(201,169,97,.18); box-shadow:0 10px 40px rgba(0,0,0,.3); }
+  .topbar-inner{ max-width:1400px; margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+  .brand{display:flex; align-items:center; gap:14px}
+  .brand-mark{ width:48px; height:48px; border-radius:10px; background:#fff; display:grid; place-items:center; box-shadow:0 8px 24px rgba(201,169,97,.35); overflow:hidden; }
+  .brand-mark img{width:100%; height:100%; object-fit:contain; padding:4px}
+  .brand-title{color:#fff; font-weight:700; font-size:15px; letter-spacing:-.01em}
+  .brand-sub{color:var(--accent-soft); font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:500; margin-top:2px}
+  .toolbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .tool-btn{ padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:all .2s; border:1px solid transparent; }
+  .tool-btn-ghost{ color:#cbd5e1; background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.08); }
+  .tool-btn-ghost:hover{background:rgba(255,255,255,.1); color:#fff}
+  .tool-btn-primary{ background:linear-gradient(135deg,var(--accent) 0%, var(--accent-deep) 100%); color:#fff; box-shadow:0 6px 18px rgba(15,118,110,.4); }
+  .tool-btn-primary:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(15,118,110,.55)}
+  
+  .workspace{ max-width:1400px; margin:0 auto; padding:28px; display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:start; }
+  @media (max-width:1024px){ .workspace{grid-template-columns:1fr; padding:18px} }
+  
+  .sidebar{ position:sticky; top:90px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:18px; backdrop-filter:blur(10px); max-height:calc(100vh - 110px); overflow-y:auto; }
+  .sidebar h3{ color:#fff; font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; margin:0 0 12px 0; color:var(--accent-soft); }
+  .nav-list{list-style:none; padding:0; margin:0 0 20px 0}
+  .nav-list li{margin:2px 0}
+  .nav-link{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#cbd5e1; font-size:13px; font-weight:500; text-decoration:none; transition:all .2s; cursor:pointer; }
+  .nav-link i{width:16px; font-size:13px; opacity:.7}
+  .nav-link:hover{background:rgba(255,255,255,.06); color:#fff}
+  .nav-link.active{ background:linear-gradient(90deg, rgba(15,118,110,.15), rgba(15,118,110,.02)); color:#fff; border-left:2px solid var(--accent); padding-left:10px; }
+  .progress-card{ background:linear-gradient(135deg, rgba(15,118,110,.15), rgba(15,118,110,.02)); border:1px solid rgba(15,118,110,.25); border-radius:12px; padding:14px; margin-top:8px; }
+  .progress-label{font-size:11px; color:#94a3b8; letter-spacing:.1em; text-transform:uppercase; font-weight:600}
+  .progress-value{font-size:24px; font-weight:700; color:#fff; margin:4px 0 8px 0}
+  .progress-bar{height:6px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden}
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-deep)); border-radius:99px; transition:width .4s ease; width:0%; }
+  .sidebar-tip{ font-size:11px; color:#94a3b8; line-height:1.5; padding:10px 12px; background:rgba(255,255,255,.03); border-radius:8px; margin-top:14px; border-left:2px solid var(--accent); }
+  
+  .editor{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:24px; backdrop-filter:blur(10px); min-width:0; }
+  .editor-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,.07); gap:16px; flex-wrap:wrap; }
+  .editor-title{color:#fff; font-size:18px; font-weight:700; letter-spacing:-.01em}
+  .editor-sub{color:#94a3b8; font-size:12px; margin-top:2px}
+  .tabs{display:flex; gap:4px; flex-wrap:wrap}
+  .tab{ padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; color:#cbd5e1; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:6px; }
+  .tab:hover{background:rgba(255,255,255,.07); color:#fff}
+  .tab.active{ background:linear-gradient(135deg,var(--accent),var(--accent-deep)); color:#fff; border-color:transparent; }
+  
+  .form-section{display:none; animation:fadeIn .35s ease}
+  .form-section.active{display:block}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)}}
+  
+  .field-group{margin-bottom:18px}
+  .field-label{ display:flex; align-items:center; gap:8px; color:#e2e8f0; font-size:13px; font-weight:600; margin-bottom:8px; }
+  .field-label . req{color:var(--accent); font-size:14px}
+  .field-hint{color:#94a3b8; font-size:11px; font-weight:400; margin-left:auto}
+  
+  .input, .textarea, .select{ width:100%; padding:11px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:8px; color:#fff; font-size:13px; font-family:inherit; transition:all .2s; outline:none; }
+  .input:focus, .textarea:focus, .select:focus{ border-color:var(--accent); background:rgba(255,255,255,.06); box-shadow:0 0 0 3px rgba(15,118,110,.12); }
+  .input::placeholder, .textarea::placeholder{color:#64748b}
+  .textarea{min-height:80px; resize:vertical; line-height:1.5}
+  .select{appearance:none; cursor:pointer; background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px}
+  .select option{background:#1A1F3A; color:#fff}
+  .input-icon{position:relative}
+  .input-icon .input{padding-left:38px}
+  .input-icon i{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--accent); font-size:13px}
+  
+  .field-grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .field-grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
+  @media (max-width:640px){.field-grid-2, .field-grid-3{grid-template-columns:1fr}}
+  
+  .hw-checkbox-group { display: flex; gap: 20px; padding-top: 5px; }
+  .hw-checkbox-label { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .hw-checkbox-label input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,.2); border-radius: 4px; background: rgba(255,255,255,.04); cursor: pointer; position: relative; transition: all .2s; }
+  .hw-checkbox-label input[type="checkbox"]:checked { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border-color: var(--accent); }
+  .hw-checkbox-label input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  
+  .equipment-card{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:16px; margin-bottom:14px; position:relative; }
+  .equipment-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed rgba(255,255,255,.08); }
+  .equipment-tag{ display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .tag-server{background:rgba(15,118,110,.18); color:#5eead4; border:1px solid rgba(15,118,110,.3)}
+  .tag-storage{background:rgba(201,169,97,.18); color:var(--accent-soft); border:1px solid rgba(201,169,97,.3)}
+  .tag-san{background:rgba(168,50,78,.18); color:#fca5b8; border:1px solid rgba(168,50,78,.3)}
+  .btn-remove{ width:28px; height:28px; border-radius:6px; background:rgba(168,50,78,.15); color:#fca5b8; border:1px solid rgba(168,50,78,.25); cursor:pointer; display:grid; place-items:center; transition:all .2s; }
+  .btn-remove:hover{background:rgba(168,50,78,.3)}
+  .btn-add-equipment{ width: 100%; padding:12px; background:rgba(15,118,110,.08); border:1px dashed rgba(15,118,110,.35); border-radius:10px; color:#5eead4; font-weight:600; font-size:13px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-add-equipment:hover{background:rgba(15,118,110,.15)}
+  
+  .checklist-group{ background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .checklist-title{ color:#fff; font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .checklist-title i{color:var(--accent)}
+  .check-row{ display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+  .check-row:last-child{border-bottom:none}
+  .check-row input[type="checkbox"]{ appearance:none; -webkit-appearance:none; width:18px; height:18px; min-width:18px; border:1.5px solid rgba(255,255,255,.2); border-radius:4px; background:rgba(255,255,255,.04); cursor:pointer; position:relative; margin-top:1px; transition:all .2s; }
+  .check-row input[type="checkbox"]:checked{ background:linear-gradient(135deg,var(--accent),var(--accent-deep)); border-color:var(--accent); }
+  .check-row input[type="checkbox"]:checked::after{ content:''; position:absolute; left:5px; top:1px; width:5px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .check-content{flex:1}
+  .check-label{color:#e2e8f0; font-size:12.5px; font-weight:500; line-height:1.4}
+  .check-remark{ margin-top:6px; width:100%; padding:6px 10px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:6px; color:#cbd5e1; font-size:12px; font-family:inherit; outline:none; }
+  .check-remark:focus{border-color:var(--accent)}
+  .check-remark::placeholder{color:#64748b}
+  
+  .upload-zone{ border:1.5px dashed rgba(255,255,255,.15); border-radius:10px; padding:18px; background:rgba(255,255,255,.02); text-align:center; cursor:pointer; transition:all .25s; margin-top:10px; }
+  .upload-zone:hover, .upload-zone.dragover{ border-color:var(--accent); background:rgba(15,118,110,.05); }
+  .upload-zone i{color:var(--accent); font-size:22px; margin-bottom:8px; display:block}
+  .upload-zone-text{color:#cbd5e1; font-size:12px}
+  .upload-zone-text strong{color:#fff}
+  .upload-zone input{display:none}
+  
+  .image-preview-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:8px; margin-top:10px; }
+  .image-preview{ position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:#000; border:1px solid rgba(255,255,255,.1); }
+  .image-preview img{width:100%; height:100%; object-fit:cover}
+  .image-preview .remove-img{ position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%; background:rgba(0,0,0,.7); color:#fff; border:none; cursor:pointer; font-size:10px; display:grid; place-items:center; }
+  .image-preview .img-label{ position:absolute; bottom:0; left:0; right:0; padding:4px 6px; background:linear-gradient(transparent, rgba(0,0,0,.85)); color:#fff; font-size:10px; text-align:left; }
+  
+  .findings-entry{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:14px; margin-bottom:10px; border-left:3px solid var(--rose); }
+  .findings-entry.corrective{border-left-color:var(--emerald)}
+  
+  /* Preview Modal & Tombol Floating */
+  .preview-modal{ position:fixed; inset:0; z-index:100; background:rgba(5,8,20,.95); backdrop-filter:blur(8px); display:none; overflow-y:auto; padding:40px 20px; }
+  .preview-modal.active{display:block}
+  
+  .preview-toolbar { position: fixed; top: 20px; right: 20px; z-index: 110; display: flex; gap: 10px; }
+  
+  .doc-container-preview { margin: 0 auto; background: #ffffff; max-width: 100%; }
+  
+  .page-wrapper { 
+    position: relative; 
+    background: #fff; 
+    margin: 0 auto 15px auto; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    width: 210mm; 
+    max-width: 100%;
+    height: 297mm; 
+    padding: 15mm 20mm 25mm 20mm; 
+    box-sizing: border-box; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+  }
+  .page-landscape { width: 297mm; height: 210mm; }
+  
+  .page-content { color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10pt; line-height: 1.5; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column;}
+  
+  .doc-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; margin-bottom:20px; border-bottom: 1px solid var(--border); font-size: 8pt; color: var(--slate); flex-shrink: 0; }
+  .doc-header-left { font-weight: 600; }
+  .doc-header-right { font-weight: 700; color: var(--accent-deep); }
+  
+  .doc-footer { position: absolute; bottom: 10mm; left: 20mm; right: 20mm; display: flex; justify-content: space-between; align-items: center; font-size: 8pt; color: var(--slate); border-top: 1px solid var(--border); padding-top: 5px; }
+  
+  .cover-page { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
+  .cover-body { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 0; width: 100%; }
+  
+  .cover-ornament { width: 80px; height: 4px; background: var(--accent); margin-bottom: 20px; }
+  .cover-title { font-family: 'Source Serif 4', serif; font-size: 42pt; font-weight: 700; color: var(--ink); margin: 0 0 10px 0; line-height: 1.1; }
+  .cover-subtitle { font-size: 14pt; color: var(--slate); margin-bottom: 50px; letter-spacing: 0.05em; }
+  .cover-info-block { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 40px 50px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .cover-info-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px dashed var(--border); }
+  .cover-info-row:last-child { border-bottom: none; }
+  .cover-info-label { font-size: 10pt; color: var(--slate); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+  .cover-info-value { font-size: 13pt; font-weight: 700; color: var(--ink); text-align: right; }
+  .cover-footer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: auto; margin-bottom: 40px; }
+  .cover-footer-logo { width: 100px; height: auto; }
+  .cover-footer-text { font-size: 12pt; font-weight: 700; color: var(--ink); margin: 0; }
+  
+  .toc-title { font-family: 'Source Serif 4', serif; font-size: 24pt; font-weight: 700; color: var(--ink); text-align: center; margin: 40px 0 30px 0; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 11pt; }
+  .toc-text { font-weight: 600; color: var(--ink); }
+  .toc-page { font-family: 'JetBrains Mono', monospace; color: var(--accent-deep); font-weight: 700; }
+  
+  .doc-section{margin-bottom:20px;}
+  .doc-section-title{ display:flex; align-items:center; gap:10px; font-size:11pt; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; padding-bottom:5px; border-bottom:2px solid var(--accent); }
+  .doc-section-title::before{ content:''; width:4px; height:14px; background:var(--accent); border-radius:2px; }
+  .doc-section-title .num{ font-family:'JetBrains Mono', monospace; color:var(--accent-deep); font-size:10pt; font-weight:700; }
+  
+  .doc-paragraph { margin: 0 0 10px 0; font-size: 10pt; }
+  .doc-paragraph strong { display: block; margin-bottom: 4px; font-size: 10pt; color: var(--ink); }
+  .doc-paragraph-justify {
+    text-align: justify; 
+    text-justify: inter-word;
+    padding-left: 15px; 
+    border-left: 3px solid var(--paper-deep); 
+    margin-top: 5px;
+  }
+  .doc-paragraph-justify p { margin: 0 0 8px 0; }
+  
+  .info-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:0; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
+  .info-cell{ padding:8px 10px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .info-cell:nth-child(4n){border-right:none}
+  .info-cell:nth-last-child(-n+4){border-bottom:none}
+  .info-cell .label{ font-size:7pt; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:700; margin-bottom:3px; }
+  .info-cell .value{ font-size:9pt; font-weight:600; color:var(--ink); word-break:break-word; }
+  .info-cell .value.empty{color:var(--slate-light); font-style:italic; font-weight:400}
+  
+  .doc-table, .checklist-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: 9pt; margin-bottom: 10px; table-layout: fixed; word-wrap: break-word; }
+  .doc-table th, .checklist-table th { background: var(--paper-deep); color: var(--ink); padding: 8px 10px; text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; border-bottom: 1px solid var(--border); word-wrap: break-word; vertical-align: top; }
+  .doc-table td, .checklist-table td { padding: 8px 10px; border-top: 1px solid var(--border-soft); vertical-align: top; word-wrap: break-word; white-space: normal; }
+  .doc-table tr, .checklist-table tr { page-break-inside: avoid !important; }
+  .doc-table tr:nth-child(even) td, .checklist-table tr:nth-child(even) td {background:var(--paper-warm)}
+  .doc-table .center{text-align:center}
+  
+  .excel-display-table { width: 100%; border-collapse: collapse; font-size: 8pt; background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; table-layout: auto; word-wrap: break-word; }
+  .excel-display-table th { background: var(--paper-deep); padding: 6px 8px; text-align: left; border: 1px solid var(--border); font-weight: 700; font-size: 8pt; word-wrap: break-word; white-space: nowrap; }
+  .excel-display-table td { padding: 4px 8px; border: 1px solid var(--border-soft); font-size: 8pt; word-wrap: break-word; white-space: normal; }
+  .excel-display-table tr { page-break-inside: avoid !important; }
+  
+  .word-content-display { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1;}
+  .word-doc-view p { margin: 0 0 10px 0; line-height: 1.5; page-break-inside: avoid; text-align: center; }
+  .word-doc-view img { max-width: 100% !important; height: auto !important; max-height: 105mm; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border); page-break-inside: avoid !important; object-fit: contain; }
+  
+  .findings-card{ border:1px solid var(--border); border-radius:6px; background:#fff; padding:15px; margin-bottom:12px; border-left:4px solid var(--rose); page-break-inside: avoid !important; }
+  .findings-card.corrective{border-left-color:var(--emerald)}
+  .findings-card-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px; }
+  .findings-card-title{font-weight:700; color:var(--ink); font-size:10pt}
+  .findings-card-meta{font-size:8pt; color:var(--slate); margin-top:2px}
+  .findings-card-body{font-size:9pt; color:var(--ink-2); line-height:1.5; margin-top:8px}
+  .findings-card-body strong{color:var(--ink); display:block; margin-bottom:4px;}
+  
+  .doc-images{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; page-break-inside: avoid !important; }
+  .doc-image{ border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#fff; }
+  .doc-image img{ width:100%; aspect-ratio:4/3; object-fit:cover; display:block; }
+  .doc-image .caption{ padding:5px 8px; font-size:7pt; color:var(--slate); border-top:1px solid var(--border-soft); background:var(--paper-warm); text-align: center; }
+  
+  /* PERBAIKAN: Tabel Tanda Tangan Standar Korporat */
+  .sign-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; table-layout: fixed; page-break-inside: avoid !important; }
+  .sign-table th { border: 1px solid var(--border); background: var(--paper-deep); padding: 8px; text-align: center; font-size: 9pt; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .sign-table td { border: 1px solid var(--border); padding: 10px; text-align: center; vertical-align: bottom; }
+  .sign-table .sign-space { height: 20mm; } 
+  .sign-name { font-weight: 700; font-size: 10pt; margin-bottom: 2px; }
+  .sign-role { font-size: 8pt; color: var(--slate); margin-bottom: 5px; text-transform: uppercase; }
+  .sign-date { font-size: 8pt; color: var(--slate); margin-top: 5px; }
+  
+  .empty-state{ text-align:center; padding:20px; color:var(--slate-light); font-style:italic; font-size:9pt; }
+  
+  ::-webkit-scrollbar{width:8px; height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(15,118,110,.2); border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(15,118,110,.35)}
+  
+  .toast{ position:fixed; bottom:24px; right:24px; padding:14px 20px; background:linear-gradient(135deg,var(--ink),var(--ink-2)); color:#fff; border-radius:10px; border-left:3px solid var(--accent); box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:200; transform:translateY(100px); opacity:0; transition:all .3s; font-size:13px; font-weight:500; display:flex; align-items:center; gap:10px; }
+  .toast.show{transform:translateY(0); opacity:1}
+  .toast i{color:var(--accent)}
+  
+  /* Sembunyikan elemen saat proses render export pdf berlangsung */
+  body.exporting-pdf .preview-toolbar { display: none !important; }
+  body.exporting-pdf .page-wrapper { margin: 0 !important; box-shadow: none !important; }
+</style>
+</head>
+<body>
+
+<header class="topbar no-print">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <img id="brandLogo" src="https://z-cdn-media.chatglm.cn/files/b3b2edc4-d178-4c02-8440-c56a70b9018e.png?auth_key=1889439627-774e86bdd2824914a249559f7724544a-0-e391855b23150fc9a096e0f6293c819b" alt="MII Logo" crossorigin="anonymous">
+      </div>
+      <div>
+        <div class="brand-title">Maintenance Report HSS2 - PT. Mitra Integrasi Informatika</div>
+        <div class="brand-sub">Server · Storage · SAN Switch</div>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <button class="tool-btn tool-btn-ghost" onclick="loadSample()"><i class="fas fa-flask"></i> Sample Data</button>
+      <button class="tool-btn tool-btn-ghost" onclick="clearAll()"><i class="fas fa-eraser"></i> Reset</button>
+      <button class="tool-btn tool-btn-primary" onclick="openPreview()"><i class="fas fa-file-alt"></i> Generate Report</button>
+    </div>
+  </div>
+</header>
+
+<div class="workspace">
+  <aside class="sidebar no-print">
+    <h3>Report Sections</h3>
+    <ul class="nav-list">
+      <li><a class="nav-link active" data-tab="info"><i class="fas fa-circle-info"></i> Report Information</a></li>
+      <li><a class="nav-link" data-tab="equipment"><i class="fas fa-server"></i> Equipment Uploads</a></li>
+      <li><a class="nav-link" data-tab="checklist"><i class="fas fa-list-check"></i> Checklist</a></li>
+      <li><a class="nav-link" data-tab="findings"><i class="fas fa-magnifying-glass"></i> Findings &amp; Actions</a></li>
+      <li><a class="nav-link" data-tab="signatures"><i class="fas fa-signature"></i> Signatures</a></li>
+    </ul>
+    <div class="progress-card">
+      <div class="progress-label">Completion</div>
+      <div class="progress-value" id="progressVal">0%</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="sidebar-tip">
+      <i class="fas fa-lightbulb" style="color:var(--accent)"></i> 
+      Tip: Isi semua bagian untuk mendapatkan laporan yang lengkap. Gunakan tombol <strong>Generate Report</strong> untuk melihat hasil laporan.<br><br>
+      <i class="fas fa-print" style="color:var(--accent)"></i>
+      <strong>Tips Print:</strong> Saat dialog Print terbuka (Ctrl+P), pastikan opsi <strong>"Headers and footers"</strong> di-nonaktifkan (unchecked) agar nomor halaman tidak ganda.
+    </div>
+  </aside>
+  
+  <main class="editor no-print">
+    <div class="editor-header">
+      <div>
+        <div class="editor-title">Maintenance Report Editor</div>
+        <div class="editor-sub">Lengkapi data berikut untuk membuat dokumen laporan</div>
+      </div>
+      <div class="tabs">
+        <a class="tab active" data-tab="info"><i class="fas fa-circle-info"></i> Info</a>
+        <a class="tab" data-tab="equipment"><i class="fas fa-server"></i> Equipment</a>
+        <a class="tab" data-tab="checklist"><i class="fas fa-list-check"></i> Checklist</a>
+        <a class="tab" data-tab="findings"><i class="fas fa-magnifying-glass"></i> Findings</a>
+        <a class="tab" data-tab="signatures"><i class="fas fa-signature"></i> Sign</a>
+      </div>
+    </div>
+    
+    <section class="form-section active" id="sec-info">
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Report Type <span class="req">*</span></label>
+          <select class="select" id="f_reportType">
+            <option value="">— Pilih Jenis Laporan —</option>
+            <option value="Preventive Maintenance">Preventive Maintenance</option>
+            <option value="Corrective Maintenance">Corrective Maintenance</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Report ID <span class="req">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-hashtag"></i>
+            <input class="input" id="f_reportId" placeholder="PM-2024-001 atau CM-2024-001">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Choose Hardware <span class="req">*</span></label>
+        <div class="hw-checkbox-group">
+          <label class="hw-checkbox-label"><input type="checkbox" id="hw_server" checked onchange="updateHardwareSelection()"> Server</label>
+          <label class="hw-checkbox-label"><input type="checkbox" id="hw_storage" checked onchange="updateHardwareSelection()"> Storage</label>
+          <label class="hw-checkbox-label"><input type="checkbox" id="hw_san" checked onchange="updateHardwareSelection()"> SAN Switch</label>
+        </div>
+      </div>
+
+      <div class="field-grid-3">
+        <div class="field-group">
+          <label class="field-label">Project Name</label>
+          <input class="input" id="f_projectName" placeholder="Nama Project">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contract Number</label>
+          <input class="input" id="f_contractNo" placeholder="Nomor Kontrak">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Period</label>
+          <input class="input" id="f_period" placeholder="Contoh: Oktober 2024">
+        </div>
+      </div>
+      
+      <div class="field-grid-3">
+        <div class="field-group">
+          <label class="field-label">Report Date <span class="req">*</span></label>
+          <input type="date" class="input" id="f_reportDate">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Start Time</label>
+          <input type="time" class="input" id="f_startTime">
+        </div>
+        <div class="field-group">
+          <label class="field-label">End Time</label>
+          <input type="time" class="input" id="f_endTime">
+        </div>
+      </div>
+      
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Engineer Name <span class="req">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-user-tie"></i>
+            <input class="input" id="f_engineer" placeholder="Nama teknisi lapangan">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Customer / Client</label>
+          <input class="input" id="f_customer" placeholder="Nama perusahaan klien">
+        </div>
+      </div>
+      
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Site Location</label>
+          <input class="input" id="f_location" placeholder="Lokasi site / data center">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Priority</label>
+          <select class="select" id="f_priority">
+            <option value="Normal">Normal</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+            <option value="Emergency">Emergency</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="field-group">
+        <label class="field-label">Maintenance Objective / Description</label>
+        <textarea class="textarea" id="f_objective" placeholder="Tujuan dan ruang lingkup pekerjaan maintenance...">Melakukan preventive maintenance rutin untuk infrastruktur sistem guna memastikan ketersediaan dan keandalan peralatan</textarea>
+      </div>
+    </section>
+    
+    <section class="form-section" id="sec-equipment">
+      <div style="margin-bottom: 20px; padding: 15px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(15,118,110,.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <h4 style="margin:0; color:#5eead4; font-size:14px;"><i class="fas fa-file-excel"></i> Excel Files (Hardware List)</h4>
+          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('excel')"><i class="fas fa-plus"></i> Add Excel File</button>
+        </div>
+        <div id="excelEquipmentList"></div>
+        <div id="excelEquipmentEmpty" class="empty-state" style="color:#64748b; border: 1px dashed rgba(255,255,255,.1); padding: 15px; border-radius: 8px;">
+          Belum ada file Excel ditambahkan.
+        </div>
+      </div>
+
+      <div style="padding: 15px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(168, 50, 78, .05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <h4 style="margin:0; color:#fca5b8; font-size:14px;"><i class="fas fa-file-word"></i> Word Files (Details & Photo)</h4>
+          <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addEquipment('word')"><i class="fas fa-plus"></i> Add Word File</button>
+        </div>
+        <div id="wordEquipmentList"></div>
+        <div id="wordEquipmentEmpty" class="empty-state" style="color:#64748b; border: 1px dashed rgba(255,255,255,.1); padding: 15px; border-radius: 8px;">
+          Belum ada file Word ditambahkan.
+        </div>
+      </div>
+    </section>
+    
+    <section class="form-section" id="sec-checklist">
+      <p style="color:#cbd5e1; font-size:13px; margin:0 0 14px 0">Centang item yang sesuai dan tambahkan keterangan bila perlu. <strong style="color:#fca5b8">Catatan: Item yang tidak dicentang tidak akan ditampilkan di laporan.</strong></p>
+      <div id="checklistContainer"></div>
+    </section>
+    
+    <section class="form-section" id="sec-findings">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+        <p style="color:#cbd5e1; font-size:13px; margin:0">Temuan, masalah, dan tindakan korektif yang diambil.</p>
+        <button class="btn-add-equipment" style="width:auto; padding:8px 14px" onclick="addFinding()"><i class="fas fa-plus"></i> Add Finding</button>
+      </div>
+      <div id="findingsList"></div>
+      <div id="findingsEmpty" class="empty-state" style="color:#64748b">
+        <i class="fas fa-magnifying-glass" style="font-size:32px; opacity:.4; display:block; margin-bottom:8px"></i>
+        Belum ada temuan. Klik Add Finding untuk menambah.
+      </div>
+    </section>
+    
+    <section class="form-section" id="sec-signatures">
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Prepared By - Name</label>
+          <input class="input" id="f_prepName" placeholder="Nama engineer">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Prepared By - Role</label>
+          <input class="input" id="f_prepRole" placeholder="Field Engineer">
+        </div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Reviewed By - Name</label>
+          <input class="input" id="f_revName" placeholder="Nama supervisor">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Reviewed By - Role</label>
+          <input class="input" id="f_revRole" placeholder="Service Manager">
+        </div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field-group">
+          <label class="field-label">Acknowledged By - Name</label>
+          <input class="input" id="f_ackName" placeholder="Nama perwakilan klien">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Acknowledged By - Role</label>
+          <input class="input" id="f_ackRole" placeholder="Customer Representative">
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="preview-modal" id="previewModal">
+  <div class="preview-toolbar no-print">
+    <button class="tool-btn tool-btn-primary" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
+  </div>
+  <div class="doc-container-preview" id="docContainer"></div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Saved</span></div>
+
+<script>
+let LOGO_URL = "https://z-cdn-media.chatglm.cn/files/b3b2edc4-d178-4c02-8440-c56a70b9018e.png?auth_key=1889439627-774e86bdd2824914a249559f7724544a-0-e391855b23150fc9a096e0f6293c819b&t=" + Date.now();
+
+function convertLogoToBase64(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.height = img.naturalHeight;
+      canvas.width = img.naturalWidth;
+      ctx.drawImage(img, 0, 0);
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        LOGO_URL = dataUrl;
+        document.getElementById('brandLogo').src = dataUrl;
+        resolve(dataUrl);
+      } catch (e) {
+        document.getElementById('brandLogo').src = url;
+        resolve(url);
+      }
+    };
+    img.onerror = function() { 
+      document.getElementById('brandLogo').src = url;
+      resolve(url); 
+    };
+    img.src = url;
+  });
+}
+convertLogoToBase64(LOGO_URL);
+
+const state = {
+  report: {
+    type:'', id:'', date:'', startTime:'', endTime:'',
+    engineer:'', customer:'', location:'', priority:'Normal',
+    objective:'Melakukan preventive maintenance rutin untuk infrastruktur sistem guna memastikan ketersediaan dan keandalan peralatan',
+    summary:'', notes:'',
+    projectName:'', contractNo:'', period:'',
+    hardwareTypes: ['server', 'storage', 'san']
+  },
+  equipment: [],
+  checklist: {},
+  findings: [],
+  signatures: { prepName:'', prepRole:'', revName:'', revRole:'', ackName:'', ackRole:'' }
+};
+
+const CHECKLIST_DEFS = {
+  server: { label:'Server Checklist', icon:'fa-server', items:['Periksa kondisi fisik server','Periksa status LED indikator depan panel','Cek log system dan event logs untuk error','Periksa koneksi power supply (redundansi)','Verifikasi status fan dan suhu internal','Periksa kabel power dan kabel data','Cek penggunaan CPU, Memory, dan Disk utilization','Verifikasi status RAID controller dan logical drive','Periksa status Network Interface Card (NIC)','Update firmware / BIOS / iLO bila diperlukan','Lakukan backup konfigurasi system','Periksa akses remote management (iLO/iDRAC)','Test failover bila konfigurasi cluster aktif','Pastikan label equipment terpasang dengan benar'] },
+  storage: { label:'Storage Checklist', icon:'fa-database', items:['Periksa kondisi fisik storage array','Periksa status LED controller dan disk tray','Verifikasi kapasitas storage yang tersedia','Periksa status RAID group dan hot spare disk','Cek health status setiap disk (SED/SSD/HDD)','Periksa replication status (bila ada)','Verifikasi koneksi FC/iSCSI ke host','Cek storage cache dan battery status','Periksa event log storage array','Lakukan storage performance monitoring','Verifikasi snapshot schedule dan status','Periksa suhu dan kelembaban storage room','Backup konfigurasi storage array','Verifikasi LUN masking dan zoning'] },
+  san: { label:'SAN Switch Checklist', icon:'fa-network-wired', items:['Periksa kondisi fisik SAN switch','Periksa status LED indikator semua port','Verifikasi status semua port (online/offline)','Cek log fabric untuk error atau warning','Periksa koneksi fiber optic cable','Verifikasi zoning configuration','Periksa fabric topology dan ISL link','Cek SFP transceiver status setiap port','Periksa power supply redundansi','Verifikasi firmware version switch','Backup switch configuration','Cek suhu internal switch','Periksa domain ID dan fabric name','Test connectivity end-to-end'] }
+};
+
+function getSelectedHardwareText() {
+  let hwParts = [];
+  if (state.report.hardwareTypes.includes('server')) hwParts.push('Server');
+  if (state.report.hardwareTypes.includes('storage')) hwParts.push('Storage');
+  if (state.report.hardwareTypes.includes('san')) hwParts.push('SAN Switch');
+  return hwParts.join(', ');
+}
+
+function updateHardwareSelection() {
+  let tempTypes = [];
+  if (document.getElementById('hw_server').checked) tempTypes.push('server');
+  if (document.getElementById('hw_storage').checked) tempTypes.push('storage');
+  if (document.getElementById('hw_san').checked) tempTypes.push('san');
+  
+  if (tempTypes.length === 0) {
+    alert('Pilih minimal satu tipe hardware!');
+    if (!document.getElementById('hw_server').checked) document.getElementById('hw_server').checked = true;
+    if (!document.getElementById('hw_storage').checked) document.getElementById('hw_storage').checked = true;
+    if (!document.getElementById('hw_san').checked) document.getElementById('hw_san').checked = true;
+    return; 
+  }
+  
+  state.report.hardwareTypes = tempTypes;
+  renderChecklists();
+  
+  const hwText = getSelectedHardwareText();
+  state.report.objective = `Melakukan preventive maintenance rutin untuk infrastruktur sistem (${hwText}) guna memastikan ketersediaan dan keandalan peralatan`;
+  document.getElementById('f_objective').value = state.report.objective;
+  
+  generateAutoSummary();
+}
+
+function switchTab(name){
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.toggle('active', l.dataset.tab===name));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.form-section').forEach(s=>s.classList.toggle('active', s.id==='sec-'+name));
+}
+document.querySelectorAll('[data-tab]').forEach(el=>{
+  el.addEventListener('click', e=>{
+    e.preventDefault();
+    switchTab(el.dataset.tab);
+  });
+});
+
+const fieldMap = {
+  f_reportType:'type', f_reportId:'id', f_reportDate:'date',
+  f_startTime:'startTime', f_endTime:'endTime', f_engineer:'engineer',
+  f_customer:'customer', f_location:'location', f_priority:'priority',
+  f_objective:'objective', f_projectName:'projectName', f_contractNo:'contractNo',
+  f_period:'period'
+};
+
+Object.entries(fieldMap).forEach(([id,key])=>{
+  const el = document.getElementById(id);
+  el.addEventListener('input', (e)=>{
+    state.report[key] = e.target.value;
+    updateProgress();
+  });
+});
+
+const sigFields = ['prepName','prepRole','revName','revRole','ackName','ackRole'];
+sigFields.forEach(k=>{
+  const id = 'f_'+k;
+  const el = document.getElementById(id);
+  el.addEventListener('input', (e)=>{
+    state.signatures[k] = e.target.value;
+    updateProgress();
+  });
+});
+
+function generateAutoSummary() {
+  const r = state.report;
+  const dateStr = r.date ? fmtDate(r.date) : '(tanggal tidak disebutkan)';
+  const hwText = getSelectedHardwareText();
+  
+  let summary = `Pada tanggal ${dateStr}, telah dilakukan ${r.type || 'maintenance'} untuk infrastruktur (${hwText}). `;
+
+  if (state.findings.length > 0) {
+    summary += `Ditemukan beberapa temuan issue pada perangkat, yaitu:\n`;
+    state.findings.forEach((f, i) => {
+      summary += `${i+1}. ${f.equipment || 'Equipment'} - ${f.description || 'No description'}`;
+      if (f.action) summary += ` (Tindakan: ${f.action}).\n`;
+      else summary += '.\n';
+    });
+  } else {
+    summary += `Tidak ditemukan issue pada perangkat. Secara keseluruhan perangkat dalam keadaan normal dan siap dioperasikan.`;
+  }
+  
+  state.report.summary = summary;
+
+  if (state.findings.length > 0) {
+    let notes = `Berdasarkan temuan yang ditemukan, berikut adalah informasi dan rekomendasi:\n`;
+    state.findings.forEach((f, i) => {
+      notes += `${i+1}. Pada ${f.equipment || 'Equipment'}: ${f.description || 'No description'}.\n`;
+      if (f.rootCause) notes += `Root cause: ${f.rootCause}.\n`;
+      if (f.action) notes += `Rekomendasi/Tindakan: ${f.action}.\n`;
+    });
+    state.report.notes = notes;
+  } else {
+    state.report.notes = "Tidak ada rekomendasi khusus. Sistem siap dioperasikan normal. Lanjutkan jadwal maintenance rutin berikutnya.";
+  }
+}
+
+let eqCounter = 0;
+function addEquipment(fileType){
+  eqCounter++;
+  const id = 'eq_'+eqCounter;
+  
+  const eq = { id, type:'generic', excelData:null, excelName:'', wordContent:'', wordName:'', fileType: fileType };
+  state.equipment.push(eq);
+  
+  const card = document.createElement('div');
+  card.className = 'equipment-card';
+  card.id = 'card_'+id;
+  
+  const labels = { excel: 'Hardware List (Excel)', word: 'Details & Photo (Word)' };
+  const tagClass = { excel: 'tag-storage', word: 'tag-san' };
+  const icons = { excel: 'fa-file-excel', word: 'fa-file-word' };
+
+  if (fileType === 'excel') {
+    card.innerHTML = `
+      <div class="equipment-card-head">
+        <span class="equipment-tag ${tagClass[fileType]}"><i class="fas ${icons[fileType]}"></i> ${labels[fileType]}</span>
+        <button class="btn-remove" onclick="removeEquipment('${id}')"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="field-group">
+        <div class="upload-zone" id="exceldrop_${id}" style="padding:12px">
+          <i class="fas fa-file-excel"></i>
+          <div class="upload-zone-text" id="exceltxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Excel</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="uploadExcel('${id}', this.files)">
+        </div>
+        <div id="excelPreview_${id}" style="margin-top:10px;"></div>
+      </div>
+    `;
+    document.getElementById('excelEquipmentList').appendChild(card);
+    document.getElementById('excelEquipmentEmpty').style.display = 'none';
+    
+    const excelDrop = document.getElementById('exceldrop_'+id);
+    excelDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') excelDrop.querySelector('input').click(); });
+    excelDrop.addEventListener('dragover', e=>{ e.preventDefault(); excelDrop.classList.add('dragover'); });
+    excelDrop.addEventListener('dragleave', ()=> excelDrop.classList.remove('dragover'));
+    excelDrop.addEventListener('drop', e=>{ e.preventDefault(); excelDrop.classList.remove('dragover'); uploadExcel(id, e.dataTransfer.files); });
+  } else {
+    card.innerHTML = `
+      <div class="equipment-card-head">
+        <span class="equipment-tag ${tagClass[fileType]}"><i class="fas ${icons[fileType]}"></i> ${labels[fileType]}</span>
+        <button class="btn-remove" onclick="removeEquipment('${id}')"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="field-group">
+        <div class="upload-zone" id="worddrop_${id}" style="padding:12px">
+          <i class="fas fa-file-word"></i>
+          <div class="upload-zone-text" id="wordtxt_${id}">Drag &amp; drop atau <strong>klik untuk upload</strong> file Word</div>
+          <input type="file" accept=".docx,.doc" onchange="uploadWord('${id}', this.files)">
+        </div>
+      </div>
+    `;
+    document.getElementById('wordEquipmentList').appendChild(card);
+    document.getElementById('wordEquipmentEmpty').style.display = 'none';
+    
+    const wordDrop = document.getElementById('worddrop_'+id);
+    wordDrop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') wordDrop.querySelector('input').click(); });
+    wordDrop.addEventListener('dragover', e=>{ e.preventDefault(); wordDrop.classList.add('dragover'); });
+    wordDrop.addEventListener('dragleave', ()=> wordDrop.classList.remove('dragover'));
+    wordDrop.addEventListener('drop', e=>{ e.preventDefault(); wordDrop.classList.remove('dragover'); uploadWord(id, e.dataTransfer.files); });
+  }
+  
+  updateProgress();
+  generateAutoSummary();
+}
+
+function uploadExcel(eqId, files) {
+  const eq = state.equipment.find(e=>e.id===eqId);
+  if(!eq || !files[0]) return;
+  const file = files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      eq.excelData = json;
+      eq.excelName = file.name;
+      document.getElementById('exceltxt_'+eqId).innerHTML = `<strong>${file.name}</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+      renderExcelPreview(eqId);
+      generateAutoSummary();
+    } catch (err) { alert('Gagal membaca file Excel. Pastikan format valid.'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderExcelPreview(eqId) {
+  const eq = state.equipment.find(e=>e.id===eqId);
+  const cont = document.getElementById('excelPreview_'+eqId);
+  if (!eq.excelData) { cont.innerHTML = ''; return; }
+  const headers = eq.excelData[0] || [];
+  const rows = eq.excelData.slice(1).filter(r => r.some(c => c !== null && c !== ''));
+  let html = '<div style="max-height:200px; overflow:auto; border:1px solid rgba(255,255,255,.1); border-radius:6px; background:rgba(0,0,0,.2);"><table style="width:100%; border-collapse:collapse; font-size:11px; color:#e2e8f0;"><thead><tr>';
+  headers.forEach(h => html += `<th style="background:#1A1F3A; padding:8px; text-align:left; border-bottom:1px solid rgba(255,255,255,.1); position:sticky; top:0;">${h || ''}</th>`);
+  html += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += '<tr>';
+    headers.forEach((_, i) => html += `<td style="padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.05); white-space:nowrap;">${r[i] !== undefined ? r[i] : ''}</td>`);
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
+}
+
+function uploadWord(eqId, files) {
+  const eq = state.equipment.find(e=>e.id===eqId);
+  if(!eq || !files[0]) return;
+  const file = files[0];
+  if (!file.name.match(/\.(docx|doc)$/)) { alert('Silakan upload file Word (.docx atau .doc)'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      if (typeof mammoth === 'undefined') { alert('Library Mammoth belum siap. Coba lagi.'); return; }
+      mammoth.convertToHtml({arrayBuffer: e.target.result})
+        .then(result => {
+          eq.wordContent = result.value;
+          eq.wordName = file.name;
+          document.getElementById('wordtxt_'+eqId).innerHTML = `<strong>${file.name}</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+          generateAutoSummary();
+        })
+        .catch(err => {
+          console.error(err);
+          eq.wordContent = `<div style="padding:10px; background:#fff; border:1px solid #ddd; font-style:italic; color:#555;">Dokumen Word (${file.name}) berhasil diunggah, namun konten detail foto tidak dapat diekstrak secara penuh di browser.</div>`;
+          eq.wordName = file.name;
+          document.getElementById('wordtxt_'+eqId).innerHTML = `<strong>${file.name}</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+          generateAutoSummary();
+        });
+    } catch (err) { alert('Gagal membaca file Word.'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function removeEquipment(id){
+  const eq = state.equipment.find(e=>e.id===id);
+  if (!eq) return;
+  state.equipment = state.equipment.filter(e=>e.id!==id);
+  document.getElementById('card_'+id).remove();
+  
+  const excelEqs = state.equipment.filter(e => e.fileType === 'excel');
+  const wordEqs = state.equipment.filter(e => e.fileType === 'word');
+  
+  if(excelEqs.length === 0) document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  if(wordEqs.length === 0) document.getElementById('wordEquipmentEmpty').style.display = 'block';
+  
+  updateProgress();
+  generateAutoSummary();
+}
+
+function renderChecklists(){
+  const container = document.getElementById('checklistContainer');
+  container.innerHTML = '';
+  
+  if (!state.report.hardwareTypes || state.report.hardwareTypes.length === 0) {
+    container.innerHTML = '<div class="empty-state">Pilih minimal satu tipe hardware di tab Report Information.</div>';
+    return;
+  }
+
+  const selectedDefs = Object.entries(CHECKLIST_DEFS).filter(([key, def]) => {
+    return state.report.hardwareTypes.includes(key);
+  });
+
+  selectedDefs.forEach(([key, def]) => {
+    state.checklist[key] = state.checklist[key] || def.items.map(()=>({checked:false, remark:''}));
+    const grp = document.createElement('div');
+    grp.className = 'checklist-group';
+    grp.innerHTML = `
+      <div class="checklist-title"><i class="fas ${def.icon}"></i> ${def.label}</div>
+      ${def.items.map((item, idx)=>`
+        <div class="check-row">
+          <input type="checkbox" id="chk_${key}_${idx}" ${state.checklist[key][idx].checked?'checked':''} onchange="updateCheck('${key}', ${idx}, 'checked', this.checked)">
+          <div class="check-content">
+            <label class="check-label" for="chk_${key}_${idx}">${item}</label>
+            <input class="check-remark" placeholder="Keterangan (opsional)" value="${state.checklist[key][idx].remark||''}" oninput="updateCheck('${key}', ${idx}, 'remark', this.value)">
+          </div>
+        </div>
+      `).join('')}
+    `;
+    container.appendChild(grp);
+  });
+}
+function updateCheck(cat, idx, field, value){
+  state.checklist[cat][idx][field] = value;
+  updateProgress();
+  generateAutoSummary();
+}
+
+let findCounter = 0;
+function addFinding(){
+  findCounter++;
+  const id = 'find_'+findCounter;
+  const f = { id, type:'issue', equipment:'', description:'', rootCause:'', action:'', status:'Resolved', images:[] };
+  state.findings.push(f);
+  
+  const card = document.createElement('div');
+  card.className = 'findings-entry';
+  card.id = 'card_'+id;
+  card.innerHTML = `
+    <div class="equipment-card-head">
+      <select class="select" style="max-width:180px" onchange="updateFinding('${id}','type',this.value)">
+        <option value="issue">Issue / Problem</option>
+        <option value="corrective">Corrective Action</option>
+        <option value="recommendation">Recommendation</option>
+      </select>
+      <button class="btn-remove" onclick="removeFinding('${id}')"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="field-grid-2">
+      <div class="field-group"><label class="field-label">Related Equipment</label><input class="input" oninput="updateFinding('${id}','equipment',this.value)" placeholder="Hostname atau equipment"></div>
+      <div class="field-group"><label class="field-label">Status</label><select class="select" onchange="updateFinding('${id}','status',this.value)"><option value="Resolved">Resolved</option><option value="In Progress">In Progress</option><option value="Pending">Pending</option><option value="Escalated">Escalated</option></select></div>
+    </div>
+    <div class="field-group"><label class="field-label">Description</label><textarea class="textarea" oninput="updateFinding('${id}','description',this.value)" placeholder="Deskripsi temuan atau masalah..."></textarea></div>
+    <div class="field-group"><label class="field-label">Root Cause Analysis</label><textarea class="textarea" oninput="updateFinding('${id}','rootCause',this.value)" placeholder="Analisa penyebab masalah..."></textarea></div>
+    <div class="field-group"><label class="field-label">Action Taken / Recommendation</label><textarea class="textarea" oninput="updateFinding('${id}','action',this.value)" placeholder="Tindakan korektif yang dilakukan..."></textarea></div>
+    <div class="field-group">
+      <label class="field-label">Evidence Photos <span class="field-hint">max 4</span></label>
+      <div class="upload-zone" id="drop_${id}"><i class="fas fa-cloud-arrow-up"></i><div class="upload-zone-text">Drag &amp; drop atau <strong>klik untuk upload</strong></div><input type="file" accept="image/*" multiple onchange="uploadFindingImg('${id}', this.files)"></div>
+      <div class="image-preview-grid" id="preview_${id}"></div>
+    </div>
+  `;
+  document.getElementById('findingsList').appendChild(card);
+  document.getElementById('findingsEmpty').style.display = 'none';
+  
+  const drop = document.getElementById('drop_'+id);
+  drop.addEventListener('click', e=>{ if(e.target.tagName !== 'INPUT') drop.querySelector('input').click(); });
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', ()=> drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('dragover'); uploadFindingImg(id, e.dataTransfer.files); });
+  updateProgress();
+  generateAutoSummary();
+}
+function updateFinding(id, field, value){ const f = state.findings.find(x=>x.id===id); if(f){ f[field] = value; updateProgress(); generateAutoSummary(); } }
+function removeFinding(id){ state.findings = state.findings.filter(f=>f.id!==id); document.getElementById('card_'+id).remove(); if(state.findings.length===0) document.getElementById('findingsEmpty').style.display='block'; updateProgress(); generateAutoSummary(); }
+function uploadFindingImg(id, files){ const f = state.findings.find(x=>x.id===id); if(!f) return; Array.from(files).slice(0, 4-f.images.length).forEach(file=>{ if(!file.type.startsWith('image/')) return; const reader = new FileReader(); reader.onload = e=>{ f.images.push({name:file.name, data:e.target.result}); renderFindingImages(id); }; reader.readAsDataURL(file); }); }
+function renderFindingImages(id){ const f = state.findings.find(x=>x.id===id); const cont = document.getElementById('preview_'+id); cont.innerHTML = f.images.map((img, idx)=>`<div class="image-preview"><img src="${img.data}" alt="${img.name}"><button class="remove-img" onclick="removeFindingImg('${id}', ${idx})"><i class="fas fa-times"></i></button><div class="img-label">${img.name.length>18?img.name.slice(0,15)+'...':img.name}</div></div>`).join(''); }
+function removeFindingImg(id, idx){ const f = state.findings.find(x=>x.id===id); f.images.splice(idx,1); renderFindingImages(id); }
+
+function updateProgress(){
+  let total=0, done=0;
+  ['type','id','date','engineer','objective','projectName','contractNo','period'].forEach(k=>{ total++; if(state.report[k] && state.report[k].trim()) done++; });
+  if(state.equipment.length>0){ total += state.equipment.length * 2; state.equipment.forEach(e=>{ if(e.excelData) done++; if(e.wordContent) done++; }); } else { total += 2; }
+  Object.entries(CHECKLIST_DEFS).forEach(([key, def])=>{ if(state.report.hardwareTypes && state.report.hardwareTypes.includes(key)) { def.items.forEach(item => { total++; if(state.checklist[key] && state.checklist[key][def.items.indexOf(item)] && state.checklist[key][def.items.indexOf(item)].checked) done++; }); } });
+  ['prepName','prepRole'].forEach(k=>{ total++; if(state.signatures[k] && state.signatures[k].trim()) done++; });
+  const pct = Math.round((done/total)*100);
+  document.getElementById('progressVal').textContent = pct+'%';
+  document.getElementById('progressFill').style.width = pct+'%';
+}
+
+function openPreview(){ generateAutoSummary(); generateDocument(); document.getElementById('previewModal').classList.add('active'); document.body.style.overflow = 'hidden'; document.getElementById('previewModal').scrollTop = 0; }
+
+function closePreview(e){ 
+  if (e.target.id === 'previewModal' || e.keyCode === 27) {
+    document.getElementById('previewModal').classList.remove('active'); 
+    document.body.style.overflow = ''; 
+  }
+}
+document.getElementById('previewModal').addEventListener('click', closePreview);
+document.addEventListener('keydown', closePreview);
+
+function fmtDate(d){ if(!d) return '—'; const dt = new Date(d); const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return dt.getDate()+' '+months[dt.getMonth()]+' '+dt.getFullYear(); }
+
+function createPageWrapper(orientation, pageNumber, totalPages) {
+  const page = document.createElement('div');
+  page.className = `page-wrapper page-${orientation}`;
+  
+  const docHeader = `
+    <div class="doc-header">
+      <div class="doc-header-left">${escapeHtml(state.report.customer) || 'Customer'}</div>
+      <div class="doc-header-right">PT. Mitra Integrasi Informatika</div>
+    </div>
+  `;
+  
+  const docFooter = `
+    <div class="doc-footer">
+      <div>Report ID: ${escapeHtml(state.report.id) || 'N/A'}</div>
+      <div>Page ${pageNumber} of ${totalPages}</div>
+    </div>
+  `;
+  
+  page.innerHTML = `${docHeader}<div class="page-content"></div>${docFooter}`;
+  return page;
+}
+
+function formatJustifiedParagraph(text) {
+  if (!text) return '';
+  return text.split('\n').map(line => {
+    const trimmedLine = line.trim();
+    if (trimmedLine) {
+      return `<p>${escapeHtml(trimmedLine)}</p>`;
+    }
+    return '';
+  }).join('');
+}
+
+function splitWordContentByImages(htmlContent) {
+  const div = document.createElement('div');
+  div.innerHTML = htmlContent;
+  
+  const images = Array.from(div.querySelectorAll('img'));
+  if (images.length === 0) {
+    return [htmlContent];
+  }
+  
+  const pages = [];
+  for (let i = 0; i < images.length; i += 2) {
+    const pageDiv = document.createElement('div');
+    pageDiv.className = 'word-content-display';
+    
+    let prev = images[i].previousElementSibling;
+    while (prev && prev.tagName !== 'P' && prev.tagName !== 'DIV') {
+      prev = prev.previousElementSibling;
+    }
+    if (prev && prev.tagName === 'P') {
+      pageDiv.appendChild(prev.cloneNode(true));
+    }
+    
+    const imgClone1 = images[i].cloneNode(true);
+    imgClone1.style.maxHeight = '105mm'; 
+    imgClone1.style.width = 'auto';
+    imgClone1.style.display = 'block';
+    imgClone1.style.margin = '0 auto 15px auto';
+    pageDiv.appendChild(imgClone1);
+    
+    if (images[i+1]) {
+      const imgClone2 = images[i+1].cloneNode(true);
+      imgClone2.style.maxHeight = '105mm';
+      imgClone2.style.width = 'auto';
+      imgClone2.style.display = 'block';
+      imgClone2.style.margin = '0 auto';
+      pageDiv.appendChild(imgClone2);
+    }
+    
+    pages.push(pageDiv.outerHTML);
+  }
+  
+  return pages;
+}
+
+// Fungsi Export to PDF menggunakan html2canvas dan jsPDF
+async function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const pages = document.querySelectorAll('#docContainer .page-wrapper');
+    
+    toast('Sedang menyiapkan PDF... Mohon tunggu');
+    document.body.style.cursor = 'wait';
+    document.body.classList.add('exporting-pdf');
+
+    // Inisialisasi dokumen PDF kosong
+    const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        
+        // Render halaman menjadi canvas menggunakan html2canvas
+        const canvas = await html2canvas(page, {
+            scale: 2, // Resolusi tinggi agar teks tetap tajam
+            useCORS: true, // Izinkan gambar dari domain lain (Logo MII)
+            backgroundColor: '#ffffff',
+            windowWidth: page.scrollWidth,
+            windowHeight: page.scrollHeight
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95); // Gunakan JPEG untuk mengurangi ukuran file
+        
+        // Cek apakah halaman ini Landscape atau Portrait berdasarkan class
+        const isLandscape = page.classList.contains('page-landscape');
+        
+        let imgWidth = pdfWidth;
+        let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Jika tinggi gambar melebihi tinggi PDF, sesuaikan berdasarkan tinggi
+        if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = (canvas.width * imgHeight) / canvas.height;
+        }
+
+        // Jika halaman pertama, langsung tambahkan, jika tidak buat halaman baru
+        if (i > 0) {
+            if (isLandscape) {
+                pdf.addPage([pdfHeight, pdfWidth], 'l'); // Tambahkan halaman landscape
+            } else {
+                pdf.addPage([pdfWidth, pdfHeight], 'p'); // Tambahkan halaman portrait
+            }
+        } else {
+            // Ubah orientasi halaman pertama jika ternyata landscape
+            if (isLandscape) {
+                pdf.deletePage(1);
+                pdf.addPage([pdfHeight, pdfWidth], 'l');
+            }
+        }
+
+        // Posisikan gambar di tengah secara horizontal
+        const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2;
+        const y = 0;
+        
+        pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight, '', 'FAST');
+    }
+
+    // Simpan file PDF secara otomatis
+    pdf.save(`Laporan_Maintenance_${state.report.id || 'HSS2'}.pdf`);
+    
+    document.body.style.cursor = 'default';
+    document.body.classList.remove('exporting-pdf');
+    toast('PDF berhasil diunduh!');
+}
+
+function generateDocument(){
+  const r = state.report;
+  const coverSubtitle = 'Infrastruktur ' + getSelectedHardwareText();
+  
+  const container = document.getElementById('docContainer');
+  container.innerHTML = ''; 
+  
+  const excelFiles = state.equipment.filter(e => e.fileType === 'excel' && e.excelData);
+  const wordFiles = state.equipment.filter(e => e.fileType === 'word' && e.wordContent);
+
+  let wordPageCount = 0;
+  let wordFilePages = []; 
+
+  if (wordFiles.length > 0) {
+    wordFiles.forEach(e => {
+      const pages = splitWordContentByImages(e.wordContent);
+      wordFilePages.push(pages);
+      wordPageCount += pages.length;
+    });
+  }
+
+  // PERBAIKAN: Akumulasi Halaman & Daftar Isi Otomatis.
+  // Halaman 1: Report Info & Acknowledgment
+  // Halaman 2: Summary
+  // Halaman 3: Excel (Landscape)
+  // Halaman 4: Checklist
+  // Halaman 5: Findings
+  // Halaman 6: Notes
+  // Halaman 7: Word Details
+  
+  let currentPage = 1; 
+  let tocNum = 1;
+  let tocItems = [];
+  
+  tocItems.push({ num: tocNum++, text: 'Report Information', pageNum: currentPage });
+  tocItems.push({ num: tocNum++, text: 'Acknowledgment', pageNum: currentPage });
+  
+  if (r.objective || r.summary) {
+      currentPage++; // 2
+      tocItems.push({ num: tocNum++, text: 'Description & Summary', pageNum: currentPage });
+  }
+  
+  if (excelFiles.length > 0) {
+      currentPage++; // 3
+      tocItems.push({ num: tocNum++, text: 'Equipment List (Excel)', pageNum: currentPage });
+  }
+  
+  currentPage++; // 4
+  tocItems.push({ num: tocNum++, text: 'Maintenance Checklist', pageNum: currentPage });
+  
+  currentPage++; // 5
+  tocItems.push({ num: tocNum++, text: 'Findings & Corrective Actions', pageNum: currentPage });
+  
+  if (r.notes) {
+      currentPage++; // 6
+      tocItems.push({ num: tocNum++, text: 'Notes & Recommendations', pageNum: currentPage });
+  }
+  
+  if (wordFiles.length > 0) {
+      currentPage++; // 7
+      tocItems.push({ num: tocNum++, text: 'Equipment Details (Word)', pageNum: currentPage });
+      currentPage += (wordPageCount - 1); 
+  }
+  
+  const totalPages = currentPage;
+
+  // 1. Halaman Cover 
+  const coverPage = document.createElement('div');
+  coverPage.className = 'page-wrapper cover-page';
+  coverPage.innerHTML = `
+    <div class="cover-body">
+      <div class="cover-ornament"></div>
+      <h1 class="cover-title">Laporan<br>${r.type || 'Maintenance'}</h1>
+      <div class="cover-subtitle">${coverSubtitle}</div>
+      <div class="cover-info-block">
+        <div class="cover-info-row"><div class="cover-info-label">Customer / Client</div><div class="cover-info-value">${escapeHtml(r.customer) || '—'}</div></div>
+        <div class="cover-info-row"><div class="cover-info-label">Project Name</div><div class="cover-info-value">${escapeHtml(r.projectName) || '—'}</div></div>
+        <div class="cover-info-row"><div class="cover-info-label">Contract Number</div><div class="cover-info-value">${escapeHtml(r.contractNo) || '—'}</div></div>
+        <div class="cover-info-row"><div class="cover-info-label">Period</div><div class="cover-info-value">${escapeHtml(r.period) || '—'}</div></div>
+      </div>
+    </div>
+    <div class="cover-footer"><img src="${LOGO_URL}" alt="MII Logo" class="cover-footer-logo"><p class="cover-footer-text">Provided by PT. Mitra Integrasi Informatika</p></div>
+  `;
+  container.appendChild(coverPage);
+
+  // 2. Halaman Daftar Isi 
+  const tocPage = document.createElement('div');
+  tocPage.className = 'page-wrapper';
+  let tocHtml = `<div class="page-content"><div class="toc-title">Daftar Isi</div><ul class="toc-list">`;
+  tocItems.forEach(item => {
+      tocHtml += `<li class="toc-item"><span class="toc-text">${item.num}. ${item.text}</span><span class="toc-page">${item.pageNum}</span></li>`;
+  });
+  tocHtml += `</ul></div>`;
+  tocPage.innerHTML = tocHtml;
+  container.appendChild(tocPage);
+
+  let pageTracker = 1;
+  
+  // 3. Halaman Report Information & Acknowledgment (Menyatu di Halaman 1)
+  const mainPage = createPageWrapper('portrait', pageTracker, totalPages);
+  let mainContent = `
+    <div class="doc-section">
+      <div class="doc-section-title"><span class="num">01</span> Report Information</div>
+      <div class="info-grid">
+        <div class="info-cell"><div class="label">Report ID</div><div class="value ${!r.id?'empty':''}">${r.id||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Maintenance Type</div><div class="value ${!r.type?'empty':''}">${r.type||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Project Name</div><div class="value ${!r.projectName?'empty':''}">${r.projectName||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Contract No</div><div class="value ${!r.contractNo?'empty':''}">${r.contractNo||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Period</div><div class="value ${!r.period?'empty':''}">${r.period||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Date &amp; Time</div><div class="value">${fmtDate(r.date)} ${r.startTime||'—'} - ${r.endTime||'—'}</div></div>
+        <div class="info-cell"><div class="label">Engineer</div><div class="value ${!r.engineer?'empty':''}">${r.engineer||'Not specified'}</div></div>
+        <div class="info-cell"><div class="label">Site Location</div><div class="value ${!r.location?'empty':''}">${r.location||'Not specified'}</div></div>
+      </div>
+    </div>
+    <div class="doc-section">
+      <div class="doc-section-title"><span class="num">02</span> Acknowledgment</div>
+      <table class="sign-table">
+        <thead>
+          <tr>
+            <th>Prepared By</th>
+            <th>Reviewed By</th>
+            <th>Acknowledged By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sign-space"></td>
+            <td class="sign-space"></td>
+            <td class="sign-space"></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.prepName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.prepRole) || 'Field Engineer'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.revName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.revRole) || 'Service Manager'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+            <td>
+              <div class="sign-name">${escapeHtml(state.signatures.ackName) || '............................'}</div>
+              <div class="sign-role">${escapeHtml(state.signatures.ackRole) || 'Customer Representative'}</div>
+              <div class="sign-date">Date: ${fmtDate(r.date)}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+  mainPage.querySelector('.page-content').innerHTML = mainContent;
+  container.appendChild(mainPage);
+  pageTracker++;
+
+  // 4. Halaman Summary (Section 03 - Halaman 2)
+  if (r.objective || r.summary) {
+    const summaryPage = createPageWrapper('portrait', pageTracker, totalPages);
+    let summaryContent = `
+      <div class="doc-section">
+        <div class="doc-section-title"><span class="num">03</span> Description &amp; Summary</div>
+        ${r.objective ? `<p class="doc-paragraph"><strong>Objective:</strong> ${escapeHtml(r.objective)}</p>` : ''}
+        ${r.summary ? `<p class="doc-paragraph"><strong>Executive Summary:</strong></p><div class="doc-paragraph-justify">${formatJustifiedParagraph(r.summary)}</div>` : ''}
+      </div>`;
+    summaryPage.querySelector('.page-content').innerHTML = summaryContent;
+    container.appendChild(summaryPage);
+    pageTracker++;
+  }
+
+  // 5. Halaman Excel (Section 04 - Halaman 3)
+  if(excelFiles.length > 0) {
+    const excelPage = createPageWrapper('landscape', pageTracker, totalPages);
+    let excelContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">04</span> Equipment List (Excel)</div>`;
+    
+    excelFiles.forEach((e, idx) => {
+      if (e.excelData && e.excelData.length > 0) {
+        const headers = e.excelData[0] || [];
+        const rows = e.excelData.slice(1).filter(r => r.some(c => c !== null && c !== ''));
+        excelContent += '<table class="excel-display-table"><thead><tr>';
+        headers.forEach(h => excelContent += `<th>${escapeHtml(String(h || ''))}</th>`);
+        excelContent += '</tr></thead><tbody>';
+        rows.forEach(r => { excelContent += '<tr>'; headers.forEach((_, i) => excelContent += `<td>${escapeHtml(String(r[i] !== undefined ? r[i] : ''))}</td>`); excelContent += '</tr>'; });
+        excelContent += '</tbody></table>';
+      }
+    });
+    excelContent += `</div>`;
+    excelPage.querySelector('.page-content').innerHTML = excelContent;
+    container.appendChild(excelPage);
+    pageTracker++;
+  }
+
+  // 6. Halaman Checklist (Section 05 - Halaman 4)
+  const checkedItems = [];
+  if (state.report.hardwareTypes) {
+    Object.entries(CHECKLIST_DEFS).forEach(([key, def])=>{
+      if(state.report.hardwareTypes.includes(key)) {
+        if(state.checklist[key]){
+          state.checklist[key].forEach((item, idx)=>{ if(item.checked) { checkedItems.push({category: def.label, item: def.items[idx], remark: item.remark}); } });
+        }
+      }
+    });
+  }
+  const checkPage = createPageWrapper('portrait', pageTracker, totalPages);
+  let checkContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">05</span> Maintenance Checklist (Verified)</div>${checkedItems.length === 0 ? '<div class="empty-state">No checklist items verified</div>' : `<table class="checklist-table"><thead><tr><th style="width:40px; text-align:center;">No.</th><th style="width:120px">Category</th><th>Check Item</th><th style="width:35%">Remarks</th></tr></thead><tbody>${checkedItems.map((c, i)=>`<tr><td style="text-align:center; vertical-align:top;">${i+1}</td><td style="vertical-align:top;"><span style="font-size:8pt;font-weight:600;color:var(--slate)">${c.category.replace(' Checklist','')}</span></td><td style="vertical-align:top;">${c.item}</td><td style="vertical-align:top;">${c.remark ? escapeHtml(c.remark) : '<span style="color:var(--slate-light)">—</span>'}</td></tr>`).join('')}</tbody></table>`}</div>`;
+  checkPage.querySelector('.page-content').innerHTML = checkContent;
+  container.appendChild(checkPage);
+  pageTracker++;
+
+  // 7. Halaman Findings (Section 06 - Halaman 5)
+  const findPage = createPageWrapper('portrait', pageTracker, totalPages);
+  let findContent = `<div class="doc-section"><div class="doc-section-title"><span class="num">06</span> Findings &amp; Corrective Actions</div>${state.findings.length === 0 ? '<div class="empty-state">No findings recorded</div>' : state.findings.map(f=>{ const typeLabel = {issue:'Issue', corrective:'Corrective Action', recommendation:'Recommendation'}[f.type] || 'Finding'; return `<div class="findings-card ${f.type==='corrective'?'corrective':''}"><div class="findings-card-head"><div><div class="findings-card-title">${escapeHtml(f.equipment) || typeLabel}</div><div class="findings-card-meta">${typeLabel} · Status: <strong>${f.status}</strong></div></div><span class="status-badge ${f.status==='Resolved'?'status-ok':f.status==='Pending'?'status-fail':'status-issue'}">${f.status}</span></div>${f.description ? `<div class="findings-card-body"><strong>Description:</strong> ${escapeHtml(f.description)}</div>` : ''}${f.rootCause ? `<div class="findings-card-body"><strong>Root Cause:</strong> ${escapeHtml(f.rootCause)}</div>` : ''}${f.action ? `<div class="findings-card-body"><strong>Action Taken:</strong> ${escapeHtml(f.action)}</div>` : ''}${f.images.length ? `<div class="doc-images" style="margin-top:8px">${f.images.map(img=>`<div class="doc-image"><img src="${img.data}" alt="${img.name}"><div class="caption">${escapeHtml(img.name)}</div></div>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`;
+  findPage.querySelector('.page-content').innerHTML = findContent;
+  container.appendChild(findPage);
+  pageTracker++;
+
+  // 8. Halaman Notes (Section 07 - Halaman 6)
+  const notesContent = state.report.notes ? formatJustifiedParagraph(state.report.notes) : '';
+  if (state.report.notes) {
+    const notesPage = createPageWrapper('portrait', pageTracker, totalPages);
+    let notesHtml = `<div class="doc-section"><div class="doc-section-title"><span class="num">07</span> Notes &amp; Recommendations</div><div style="padding:15px; background:var(--paper-warm); border-radius:6px; border-left:3px solid var(--accent)">${notesContent}</div></div>`;
+    notesPage.querySelector('.page-content').innerHTML = notesHtml;
+    container.appendChild(notesPage);
+    pageTracker++;
+  }
+
+  // 9. Halaman Word (Section 08 - Halaman Terakhir)
+  if(wordFiles.length > 0) {
+    wordFilePages.forEach((pagesArray, fileIdx) => {
+      pagesArray.forEach((pageHtml, pageIdx) => {
+        const wordPage = createPageWrapper('portrait', pageTracker, totalPages);
+        let titleHtml = (fileIdx === 0 && pageIdx === 0) ? `<div class="doc-section-title"><span class="num">08</span> Equipment Details & Photos (Word)</div>` : '';
+        let wordContent = `<div class="doc-section" style="flex-grow: 1; display: flex; flex-direction: column;">${titleHtml}${pageHtml}</div>`;
+        wordPage.querySelector('.page-content').innerHTML = wordContent;
+        container.appendChild(wordPage);
+        pageTracker++;
+      });
+    });
+  }
+}
+
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg){ document.getElementById('toastMsg').textContent = msg; const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 3000); }
+
+function loadSample(){
+  state.report = { type:'Preventive Maintenance', id:'PM-2024-0142', projectName:'Maintenance Data Center Q4 2024', contractNo:'CTR/MII/2023/045', period:'Oktober 2024', date:new Date().toISOString().split('T')[0], startTime:'09:00', endTime:'12:30', engineer:'Ahmad Fauzi, S.T.', customer:'PT Bank Mandiri Tbk', location:'DC Production - Jakarta', priority:'High', objective:'', summary:'', notes:'', hardwareTypes: ['server', 'storage', 'san'] };
+  state.equipment = []; state.findings = []; eqCounter = 0; findCounter = 0;
+  document.getElementById('hw_server').checked = true; document.getElementById('hw_storage').checked = true; document.getElementById('hw_san').checked = true;
+  Object.entries(fieldMap).forEach(([id,key])=>{ document.getElementById(id).value = state.report[key] || ''; });
+  state.signatures = { prepName:'Ahmad Fauzi, S.T.', prepRole:'Field Engineer', revName:'Budi Santoso', revRole:'Service Manager', ackName:'Andi Wijaya', ackRole:'IT Infrastructure Manager' };
+  ['prepName','prepRole','revName','revRole','ackName','ackRole'].forEach(k=>{ document.getElementById('f_'+k).value = state.signatures[k]; });
+  document.getElementById('excelEquipmentList').innerHTML = ''; document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  document.getElementById('wordEquipmentList').innerHTML = ''; document.getElementById('wordEquipmentEmpty').style.display = 'block';
+  
+  addEquipment('excel');
+  state.equipment[0].excelData = [["Hostname", "IP Address", "OS", "Status"], ["SRV-DB-01", "10.10.1.10", "RHEL 8", "Healthy"], ["SRV-APP-02", "10.10.1.11", "Win 2019", "Healthy"]];
+  state.equipment[0].excelName = "server_list.xlsx";
+  document.getElementById('exceltxt_eq_1').innerHTML = `<strong>server_list.xlsx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+  renderExcelPreview('eq_1');
+
+  addEquipment('word');
+  state.equipment[1].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk server SRV-PROD-01:</p><img src="https://images.unsplash.com/photo-1545665277-9c5f6bd2d3e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 1"><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Server Photo 2"></div>`;
+  state.equipment[1].wordName = "doc_detail_server.docx";
+  document.getElementById('wordtxt_eq_2').innerHTML = `<strong>doc_detail_server.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+  
+  addEquipment('word');
+  state.equipment[2].wordContent = `<div class="word-doc-view"><p>Berikut adalah dokumentasi foto untuk storage array:</p><img src="https://images.unsplash.com/photo-1558494949-ef5f5f1d5f8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Storage Photo"></div>`;
+  state.equipment[2].wordName = "doc_detail_storage.docx";
+  document.getElementById('wordtxt_eq_3').innerHTML = `<strong>doc_detail_storage.docx</strong> <i class="fas fa-check-circle" style="color:var(--emerald)"></i>`;
+
+  Object.keys(state.checklist).forEach(cat=>{ state.checklist[cat].forEach((item, idx)=>{ if(idx < 5) item.checked = true; if(idx === 2) item.remark = 'Berfungsi normal, suhu stabil di 45C'; }); });
+  
+  addFinding();
+  updateFinding('find_1','type','issue'); updateFinding('find_1','equipment','SRV-PROD-DB01 / RAM Slot 2'); updateFinding('find_1','description','RAM slot 2 mengalami degradasi dan menunjukkan error multi-bit pada event log.'); updateFinding('find_1','action','Reseat RAM module pada slot 2 dan monitor untuk error selanjutnya.'); updateFinding('find_1','status','In Progress');
+  
+  updateHardwareSelection();
+  renderChecklists(); generateAutoSummary(); updateProgress(); toast('Sample data berhasil dimuat');
+}
+
+function clearAll(){
+  if(!confirm('Hapus semua data laporan? Tindakan ini tidak dapat dibatalkan.')) return;
+  state.report = { type:'', id:'', date:'', startTime:'', endTime:'', engineer:'', customer:'', location:'', priority:'Normal', objective:'', summary:'', notes:'', projectName:'', contractNo:'', period:'', hardwareTypes: ['server', 'storage', 'san'] };
+  state.equipment = []; state.findings = []; state.checklist = {}; state.signatures = { prepName:'', prepRole:'', revName:'', revRole:'', ackName:'', ackRole:'' };
+  eqCounter = 0; findCounter = 0;
+  document.getElementById('hw_server').checked = true; document.getElementById('hw_storage').checked = true; document.getElementById('hw_san').checked = true;
+  Object.entries(fieldMap).forEach(([id,key])=>{ document.getElementById(id).value = state.report[key] || ''; });
+  ['prepName','prepRole','revName','revRole','ackName','ackRole'].forEach(k=>{ document.getElementById('f_'+k).value = ''; });
+  document.getElementById('excelEquipmentList').innerHTML = ''; document.getElementById('excelEquipmentEmpty').style.display = 'block';
+  document.getElementById('wordEquipmentList').innerHTML = ''; document.getElementById('wordEquipmentEmpty').style.display = 'block';
+  document.getElementById('findingsList').innerHTML = ''; document.getElementById('findingsEmpty').style.display = 'block';
+  updateHardwareSelection(); 
+  renderChecklists(); generateAutoSummary(); updateProgress(); toast('Data berhasil direset');
+}
+
+// Init awal
+updateHardwareSelection(); 
+renderChecklists(); generateAutoSummary(); updateProgress();
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('f_reportDate').value = today;
+state.report.date = today;
+updateProgress();
+</script>
+</body>
+</html>
